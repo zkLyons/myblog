@@ -4,16 +4,17 @@ import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
 
 export default hopeTheme({
-  hostname: "https://mister-hope.github.io",
+  hostname: "https://github.com/zkLyons",
 
   author: {
-    name: "Mr.Hope",
-    url: "https://mister-hope.com",
+    name: "zkLyons",
+    url: "https://zklyons.github.io/myblog/",
   },
 
-  logo: "https://theme-hope-assets.vuejs.press/logo.svg",
-
-  repo: "vuepress-theme-hope/vuepress-theme-hope",
+  // 导航栏logo
+  logo:"/logo2.png",
+  // 默认导航到github
+  repo: "/zkLyons/myblog",
 
   docsDir: "src",
 
@@ -26,6 +27,7 @@ export default hopeTheme({
   // 页脚
   footer: "默认页脚",
   displayFooter: true,
+
 
   // 博客相关
   blog: {
@@ -40,13 +42,11 @@ export default hopeTheme({
       Dribbble: "https://example.com",
       Email: "mailto:info@example.com",
       Evernote: "https://example.com",
-      Facebook: "https://example.com",
       Flipboard: "https://example.com",
       Gitee: "https://example.com",
       GitHub: "https://example.com",
       Gitlab: "https://example.com",
       Gmail: "mailto:info@example.com",
-      Instagram: "https://example.com",
       Lark: "https://example.com",
       Lines: "https://example.com",
       Linkedin: "https://example.com",
@@ -54,14 +54,8 @@ export default hopeTheme({
       Pocket: "https://example.com",
       QQ: "https://example.com",
       Qzone: "https://example.com",
-      Reddit: "https://example.com",
-      Rss: "https://example.com",
       Steam: "https://example.com",
-      Twitter: "https://example.com",
       Wechat: "https://example.com",
-      Weibo: "https://example.com",
-      Whatsapp: "https://example.com",
-      Youtube: "https://example.com",
       Zhihu: "https://example.com",
       VuePressThemeHope: {
         icon: "https://theme-hope-assets.vuejs.press/logo.svg",

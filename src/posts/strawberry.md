@@ -7,6 +7,9 @@ category:
 tag:
   - 红
   - 小
+
+
+article: false
 ---
 
 # 草莓

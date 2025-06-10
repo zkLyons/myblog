@@ -3,13 +3,15 @@ import { defineUserConfig } from "vuepress";
 import theme from "./theme.js";
 
 export default defineUserConfig({
-  base: "/",
+  base: "/myblog/",
 
   lang: "zh-CN",
-  title: "博客演示",
-  description: "vuepress-theme-hope 的博客演示",
+  title: "zkLyons",
+  description: "我的个人博客空间",
 
   theme,
+  
+  
 
   // 和 PWA 一起启用
   // shouldPrefetch: false,
