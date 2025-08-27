@@ -1,4 +1,15 @@
-## AJAX
+---
+category:
+  - ajax,axios
+---
+
+
+
+
+
+
+
+# AJAX
 
 ### POST和ge请求有什么区别
 
