@@ -2647,7 +2647,7 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 
 
-```html
+```
 <div :style="{ color: fcolor }"></div>
 ```
 
@@ -2655,8 +2655,8 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 **错误写法**
 
-```html
-//<div :style="color: fcolor"></div>
+```
+<div :style="color: fcolor"></div>
 ```
 
 `:style` 指令需要接收一个 JavaScript 对象，格式为：  
@@ -2689,6 +2689,9 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 </div>
 ```
 
+
+
+```vue
 <div :style="{ 
              'width':'28px',
              color: fcolor, 
@@ -2700,6 +2703,11 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
      >
   动态绑定多个样式
 </div>
+```
+
+
+
+
 
 
 **CSS 属性名如果是 驼峰式 (fontSize)**
@@ -2721,7 +2729,7 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 1. **键名未加引号（特殊字符需引号）**  
 
    ```html
-   ❌// :style="{ font-size: fontSize }" // 缺少引号的连字符属性名会报错
+   ❌ :style="{ font-size: fontSize }" // 缺少引号的连字符属性名会报错
    ✅ :style="{ 'font-size': fontSize }"
    ```
 
