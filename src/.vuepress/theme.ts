@@ -8,7 +8,7 @@ export default hopeTheme({
 
   author: {
     name: "zkLyons",
-    url: "https://zklyons.github.io/myblog/",
+    url: "https://zklyons.github.io/",
   },
 
   // 导航栏logo
@@ -34,8 +34,8 @@ export default hopeTheme({
     description: "一个前端开发者",
     intro: "/intro.html",
     medias: {
-      Baidu: "https://example.com",
-      BiliBili: "https://example.com",
+      Baidu: "https://www.baidu.com/",
+      BiliBili: "https://www.bilibili.com/",
       Bitbucket: "https://example.com",
       Dingding: "https://example.com",
       Discord: "https://example.com",
