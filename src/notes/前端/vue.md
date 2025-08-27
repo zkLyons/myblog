@@ -2507,3 +2507,136 @@ export default  new Vuex.Store({
 ```
 
 ### Vue3的响应式原理
+
+```
+let person = {
+            name:'zhangkang',
+            age:18
+        }
+// vue3实现响应式原理使用的是更加强大的多proxy代理对象，代替了vue2的object.defineproperty
+// 模拟vue3实现响应式
+// person被封装为一个proxy对象，可以实现响应式，页面和数据同步变化
+person= new Proxy(person,{
+    // target值得就是person  propName指的就是读取的属性
+    get(target,propName){
+        return target[propName]
+    },
+    // 修改和追加属性的时候，调用
+    set(target,propName,value){
+        target[propName] = value
+    },
+    deleteProperty(target,propName){
+        return delete target[propName]
+    }
+})
+      
+```
+
+使用Reflect会更加优雅
+
+```\
+let person = {
+            name:'zhangkang',
+            age:18
+        }
+// peroon被封装为一个proxy对象
+// 读取和设置使用的是reflect
+person= new Proxy(person,{
+    get(target,propName){
+        return Reflect.get(target,propName)
+    },
+    // 修改和追加属性的时候，调用
+    set(target,propName,value){
+        target[propName] = value
+        Reflect.set(target,propName,value)
+    },
+    deleteProperty(target,propName){
+    //返回布尔值
+        return Reflect.deleteProperty(target,propName)
+    }
+})
+```
+
+```
+//以下是严重错误的写法
+let person = {
+            name:'zhangkang',
+            age:18
+        }
+// p被封装为一个proxy对象
+// 读取和设置使用的是reflect
+
+person = new Proxy(person,{
+    get(target,propName){
+        return Reflect.get(person,propName)
+    },
+    // 修改和追加属性的时候，调用
+    set(target,propName,value){
+        Reflect.set(person,propName,value)
+    },
+    deleteProperty(target,propName){
+        return Reflect.deleteProperty(person,propName)
+    }
+})
+
+```
+
+```
+// 当访问 person.age 时：
+person.age → 触发 Proxy 的 get 方法
+   → get 方法内执行 Reflect.get(person, prop)
+      → 再次访问 person（已被代理）
+         → 再次触发 Proxy 的 get 方法
+            → 无限循环 → 栈溢出
+            
+person.age = 200
+  → 触发 set(person, 'age', 200)
+     → 内部执行 Reflect.set(person, 'age', 150)
+        → 再次触发 set(person, 'age', 150)
+           → 无限递归            
+```
+
+```
+// 第一段代码（正确）：
+Proxy(person) → 拦截操作 → 通过 target 操作原始 person
+
+// 第二段代码（错误）：
+Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
+  ↖_______________________________↙
+            循环引用
+```
+
+> [!Note]
+>
+> target始终指向操作的原始数据，也就是未被代理的数据，访问它的时候不会被proxy拦截
+
+总结：Proxy 使用的黄金法则
+
+1. **永远不要** 在 Proxy 处理器（handler）中直接引用代理后的对象
+
+2. **始终通过** `target` 参数操作原始对象
+
+3. 需要访问代理对象时，使用 `receiver` 参数（第三个参数）
+
+   javascript
+
+   复制
+
+   ```
+   get(target, prop, receiver) {
+     return Reflect.get(target, prop, receiver)
+   }
+   ```
+
+这两段代码的差异深刻体现了 Proxy 使用中的核心陷阱，正确理解 `target` 的角色是掌握 Proxy 的关键。
+
+|                | `target`                          | `person` (代理后的变量)          |
+| :------------- | :-------------------------------- | :------------------------------- |
+| **本质**       | Proxy 构造函数接收的 **原始对象** | 被 Proxy 包裹后的 **代理对象**   |
+| **内存指向**   | 始终指向最初的对象                | 指向代理后的新对象               |
+| **操作安全性** | 安全（直接操作原始数据）          | 危险（会触发代理拦截，导致递归） |
+| **典型用途**   | 在 Proxy handler 中操作原始数据   | 给外部代码使用的代理接口         |
+
+
+
+
