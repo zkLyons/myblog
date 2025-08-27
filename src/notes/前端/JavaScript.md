@@ -1,16 +1,8 @@
----
-title: javaScript
-
-date: 2025-6-10
-
-tags: [前端, Markdown]
-
-icon: skill-icons:javascript
----
 
 
+## js
 
-###  1.全局事件对象window
+### 1.全局事件对象window
 
 在 JavaScript 中，window 是一个非常重要的全局对象，尤其是在浏览器环境中。它代表了浏览器窗口本身，是浏览器与 JavaScript 交互的核心接口
 
@@ -21,7 +13,7 @@ icon: skill-icons:javascript
 - 所有未明确指定作用域的变量和函数都会被挂载到 window 上。
 - 如果你在全局作用域中声明了一个变量或函数，它们实际上会成为 window 的属性或方法。
 
-```
+```js
 #var a 是函数级或全局级作用域变量，会被提升到全局作用域，并且会成为 window 的属性。
 var x = 10;
 #let  是块级作用域变量，不会被添加到 window。
@@ -40,7 +32,7 @@ console.log(window.sayHello);
 //同样的，如果把，函数sayhello()复制给let、const变量，最后也会输出undefined
 ```
 
-1. **window 的作用**
+2. **window 的作用**
 
 window 对象不仅是一个全局作用域的容器，它还提供了许多与浏览器交互的功能。以下是一些常见的用途：
 
@@ -72,7 +64,9 @@ window.addEventListener("load", function() {
 });
 ```
 
-1. **window 与 this 的关系**
+------
+
+3. **window 与 this 的关系**
 
 在非严格模式下，如果代码运行在全局作用域中，this 默认指向 window。这也是为什么在非严格模式下，this 被设置为 null 或 undefined 时，会自动指向 window。
 
@@ -89,7 +83,9 @@ showThis.call(null); // 非严格模式下输出：Window，严格模式下为nu
 
 在严格模式下，this 的行为会有所不同，不会自动指向 window，而是保持为 null 或 undefined。
 
-1. **window 的特殊性**
+------
+
+4. **window 的特殊性**
 
 虽然 window 是全局对象，但它也有一些特殊性：
 
@@ -99,6 +95,8 @@ showThis.call(null); // 非严格模式下输出：Window，严格模式下为nu
 ```js
 console.log(window === globalThis); // true
 ```
+
+------
 
 总结
 
@@ -178,6 +176,8 @@ button.addEventListener("click", function(e) {
 |         `e.button`         | 按下的鼠标按钮：`0`（左键）、`1`（中键）、`2`（右键） |
 | `e.ctrlKey` / `e.shiftKey` |            是否按下了 `Ctrl` 或 `Shift` 键            |
 
+------
+
 **3. 键盘事件特有属性**
 
 |           属性           |                         说明                         |
@@ -202,6 +202,8 @@ html
 </script>
 ```
 
+------
+
 **2. 停止事件冒泡*
 
 ```html
@@ -220,6 +222,8 @@ html
 </script>
 ```
 
+------
+
 **3. 获取事件目标**
 
 html
@@ -237,6 +241,8 @@ html
   });
 </script>
 ```
+
+------
 
 **4. 处理键盘输入**
 
@@ -267,6 +273,8 @@ document.addEventListener("keydown", function(e) {
   }
   ```
 
+------
+
 **2. 箭头函数中的 `this` 与 `e.currentTarget`**
 
 在箭头函数中，`this` 不会指向绑定事件的元素，但 `e.currentTarget` 仍然有效：
@@ -277,6 +285,8 @@ button.addEventListener("click", (e) => {
   console.log(e.currentTarget); // 正确指向 button 元素
 });
 ```
+
+------
 
 **3. 事件委托中的 `e.target`**
 
@@ -296,6 +306,8 @@ button.addEventListener("click", (e) => {
 </script>
 ```
 
+------
+
 **六、总结表**
 
 |        功能        |         属性/方法          |                  示例                  |
@@ -309,6 +321,8 @@ button.addEventListener("click", (e) => {
 ### 3.this的指向问题
 
 在 JavaScript 中，`this` 的指向是动态绑定的，普通函数和箭头函数在处理 `this` 时有本质区别。以下将从 **底层机制**、**使用场景**、**代码表现** 三个维度详细解析它们的差异。
+
+---
 
 #### 一、普通函数的 `this` 指向规则
 
@@ -325,7 +339,7 @@ function showThis() {
 showThis(); // 等同于 window.showThis()
 ```
 
-1. **对象方法调用**  
+2. **对象方法调用**  
 
 函数作为对象的方法被调用时，`this` 指向 **调用该方法的对象**。
 
@@ -339,7 +353,7 @@ const obj = {
 obj.greet();
 ```
 
-1. **构造函数调用**  
+3. **构造函数调用**  
 
 通过 `new` 关键字调用函数时，`this` 指向 **新创建的实例对象**。
 
@@ -351,7 +365,7 @@ const person = new Person("Bob");
 console.log(person.name); // "Bob"
 ```
 
-1. **通过 `call`/`apply`/`bind` 显式绑定**  
+4. **通过 `call`/`apply`/`bind` 显式绑定**  
 
 可以通过这些方法强制修改 `this` 的指向。
 
@@ -363,7 +377,7 @@ const user = { name: "Charlie" };
 sayHi.call(user); // "Charlie"
 ```
 
-1. **DOM 事件处理函数**  
+5. **DOM 事件处理函数**  
 
 在事件监听器中，`this` 默认指向 **触发事件的 DOM 元素**。
 
@@ -372,6 +386,8 @@ button.addEventListener("click", function() {
   console.log(this); // 指向 button 元素
 });
 ```
+
+---
 
 #### 二、箭头函数的 `this` 指向规则
 
@@ -393,7 +409,7 @@ const obj = {
 obj.greet(); // 输出 undefined（如果全局没有 name 属性）
 ```
 
-1. **嵌套函数中的表现**  
+2. **嵌套函数中的表现**  
 
 当箭头函数嵌套在普通函数中时，继承外层普通函数的 `this`。
 
@@ -412,7 +428,7 @@ const obj = {
 obj.greet();
 ```
 
-1. **DOM 事件监听器的陷阱**  
+3. **DOM 事件监听器的陷阱**  
 
 在事件监听器中使用箭头函数时，`this` 不会指向 DOM 元素。
 
@@ -422,7 +438,7 @@ button.addEventListener("click", () => {
 });
 ```
 
-1. **无法通过 `call`/`apply`/`bind` 修改**  
+4. **无法通过 `call`/`apply`/`bind` 修改**  
 
 箭头函数的 `this` 固定，无法动态改变。
 
@@ -430,6 +446,8 @@ button.addEventListener("click", () => {
 const showThis = () => console.log(this);
 showThis.call({ name: "Frank" }); // 依然指向外层 this
 ```
+
+---
 
 总结：箭头函数的this与其外层的作用域this指向一致
 
@@ -443,13 +461,15 @@ showThis.call({ name: "Frank" }); // 依然指向外层 this
 | **是否可用作构造函数**  | 是                                         | 否（没有 `prototype`，无法 `new`）   |
 | **严格模式下的 `this`** | 可以是任意值                               | 同普通函数的外层作用域 `this`        |
 
+---
+
 四、常见使用场景与陷阱
 
 1. **正确使用箭头函数的场景**
 
 • **需要固定 `this` 的回调函数**（如定时器、Promise）：
 
-```javascript
+  ```javascript
 class Timer {
   constructor() {
     this.seconds = 0;
@@ -458,11 +478,11 @@ class Timer {
     }, 1000);
   }
 }
-```
+  ```
 
 • **简化闭包中的 `this` 处理**：
 
-```javascript
+  ```javascript
 const obj = {
   values: [1, 2, 3],
   process: function() {
@@ -471,13 +491,13 @@ const obj = {
     });
   }
 };
-```
+  ```
 
-1. **避免箭头函数的场景**
+2. **避免箭头函数的场景**
 
 • **对象方法**（除非明确需要继承外层 `this`）：
 
-```javascript
+  ```javascript
 // 错误示例
 const counter = {
   count: 0,
@@ -485,18 +505,18 @@ const counter = {
     this.count++; // this 指向 window（预期是 counter）
   }
 };
-```
+  ```
 
 • **DOM 事件监听器**（需访问触发元素）：
 
-```javascript
+  ```javascript
 // 错误示例
 button.addEventListener("click", () => {
   this.style.color = "red"; // this 指向 window（无法操作元素）
 });
-```
+  ```
 
-1. **严格模式下的特殊表现**
+3. **严格模式下的特殊表现**
 
 普通函数在严格模式中，全局调用的 `this` 为 `undefined`，而箭头函数仍继承外层 `this`：
 
@@ -512,9 +532,12 @@ normalFunc();
 arrowFunc();
 ```
 
+---
+
 五、总结
 
-• **普通函数**：`this` 动态绑定，适用于需要灵活 `this` 的场景（如对象方法、构造函数）。 • **箭头函数**：`this` 静态继承，适用于固定 `this` 的场景（如闭包、回调函数），但需注意外层作用域的 `this` 是否符合预期。
+• **普通函数**：`this` 动态绑定，适用于需要灵活 `this` 的场景（如对象方法、构造函数）。
+• **箭头函数**：`this` 静态继承，适用于固定 `this` 的场景（如闭包、回调函数），但需注意外层作用域的 `this` 是否符合预期。
 
 理解两者的差异，能帮助你在代码中精准控制 `this` 的指向，避免因作用域问题导致的 Bug。
 
@@ -550,6 +573,8 @@ arrowFunc();
 
 好的！回调函数是 JavaScript 中非常重要的编程模式，尤其在异步操作、事件处理和高阶函数中广泛应用。以下是回调函数的核心应用场景和注意事项，结合代码示例和常见问题展开说明：
 
+------
+
 **回调函数是什么？**
 
 回调函数（Callback）是一个 **作为参数传递给其他函数的函数**，它会在特定条件（如异步操作完成、事件触发、任务结束）时被调用。
@@ -572,6 +597,7 @@ doSomething(callback)
 doSomething((result) => {
   console.log(result); // 1秒后输出："操作完成！"
 });
+
 ```
 
 **回调函数处理场景**
@@ -580,7 +606,7 @@ doSomething((result) => {
 
 处理需要等待的任务（如网络请求、文件读写、定时器）。
 
-```
+```js
 // 模拟网络请求
 function fetchData(url, successCallback, errorCallback) {
   setTimeout(() => {
@@ -720,6 +746,8 @@ introduce.call(user, "你好", "！");
 
 好的！`.call()` 是 JavaScript 中函数对象的一个方法，它的核心作用是 **显式指定函数执行时的 `this` 指向**，并允许你传递参数。下面我会用通俗易懂的语言和示例讲解它的作用、用法和注意事项。
 
+------
+
 **一、`.call()` 的作用**
 
 **1. 改变函数内部的 `this` 指向**
@@ -747,6 +775,8 @@ person.sayHi(); // 输出："你好，我是小明"
 person.sayHi.call(anotherPerson); // 输出："你好，我是小红"
 ```
 
+------
+
 **2. 借用其他对象的方法**
 
 如果一个对象没有某个方法，但另一个对象有，可以通过 `.call()` “借用”。
@@ -771,6 +801,8 @@ const cat = {
 dog.makeSound.call(cat); // 输出："喵喵"
 ```
 
+------
+
 **3. 传递参数**
 
 `.call()` 的第一个参数是 `this` 指向的对象，后续参数可以逐个传递给函数。
@@ -789,6 +821,8 @@ const user = { name: "张三" };
 introduce.call(user, "你好", "！"); 
 // 输出："你好，我是张三！"
 ```
+
+------
 
 **二、`.call()` 的基本语法**
 
@@ -864,6 +898,8 @@ function sumArguments() {
 
 console.log(sumArguments(1, 2, 3)); // 输出：6
 ```
+
+------
 
 **2. 实现链式调用**
 
@@ -994,7 +1030,7 @@ export default {
 
 
 
-![QQ_1749474871678](./assets/QQ_1749474871678.png?lastModify=1749531214)
+![QQ_1749474871678](./assets/QQ_1749474871678.png)
 
 `addEventListener` 方法的第三个参数用于控制事件监听的阶段。具体来说，这个参数可以是一个布尔值或一个对象，用来指定事件监听器是在捕获阶段、冒泡阶段还是两者都监听。
 
@@ -1003,13 +1039,13 @@ export default {
 - **`true`**：表示事件监听器会在事件的**捕获阶段**触发。
 - **`false`**：表示事件监听器会在事件的**冒泡阶段**触发（这是默认行为）。
 
-1. **事件传播的三个阶段**
+2. **事件传播的三个阶段**
 
 - **捕获阶段**：事件从 `window` 开始，逐级向下传播到目标元素。
 - **目标阶段**：事件到达目标元素。
 - **冒泡阶段**：事件从目标元素逐级向上传播到 `window`
 
-1. **对象参数**
+4. **对象参数**
 
 从 ECMAScript 2015（ES6）开始，`addEventListener` 的第三个参数也可以是一个对象，例如
 
@@ -1203,7 +1239,10 @@ Array.from(theUl.children).forEach((li, index) => {
 
 
 
+
 在 JavaScript 中，`filter`、`map` 和 `forEach` 都是数组的高阶函数（Higher-Order Functions），但它们的作用和返回值有显著区别。以下是三者的详细对比和使用场景：
+
+---
 
 **核心区别速查表**
 
@@ -1213,11 +1252,14 @@ Array.from(theUl.children).forEach((li, index) => {
 | `map()`     | **映射数组到新数组**   | 新数组      | ❌              | 数据转换（一对一映射）             |
 | `filter()`  | **筛选符合条件的元素** | 新数组      | ❌              | 数据过滤（根据条件保留元素）       |
 
+---
+
 #### **1. `forEach()`**
 
 用途
 
-• 遍历数组，为每个元素执行回调函数（通常用于副作用操作）。 • **不返回任何值，undifined**，直接修改原数组或执行其他操作。
+• 遍历数组，为每个元素执行回调函数（通常用于副作用操作）。
+• **不返回任何值，undifined**，直接修改原数组或执行其他操作。
 
 语法
 
@@ -1283,13 +1325,17 @@ Array.prototype.myForEach = function(callback, thisArg) {
 
 特点
 
-• **无法中途终止**：不能用 `break` 或 `return` 终止循环。 • **适合场景**：不需要返回新数组的遍历操作（如 DOM 操作、API 调用）。
+• **无法中途终止**：不能用 `break` 或 `return` 终止循环。
+• **适合场景**：不需要返回新数组的遍历操作（如 DOM 操作、API 调用）。
+
+---
 
 #### **2. `map()`**
 
 用途
 
-• 遍历数组，将每个元素映射为新值，返回新数组。 • **不修改原数组**，适合纯函数场景。,可以自己设置返回值
+• 遍历数组，将每个元素映射为新值，返回新数组。
+• **不修改原数组**，适合纯函数场景。,可以自己设置返回值
 
 语法
 
@@ -1318,13 +1364,17 @@ console.log(names); // ["Alice", "Bob"]
 
 特点
 
-• **必须返回值**：回调函数需返回新元素，否则新数组对应位置为 `undefined`。 • **适合场景**：数据清洗、格式转换、提取子集。
+• **必须返回值**：回调函数需返回新元素，否则新数组对应位置为 `undefined`。
+• **适合场景**：数据清洗、格式转换、提取子集。
+
+---
 
 #### **3. `filter()`**
 
 用途
 
-• 筛选数组中符合条件的元素，返回新数组。 • **不修改原数组**，适合数据过滤。
+• 筛选数组中符合条件的元素，返回新数组。
+• **不修改原数组**，适合数据过滤。
 
 语法
 
@@ -1371,6 +1421,9 @@ Array.prototype.filter = function (cb) {
  let newcardList = cardList.filter(
    (item) => item.category == "werewolf"
  );
+```
+
+```
 更简洁的写法：
 Array.prototype.myarray = function (cb) {
   return this.reduce((total,cur) => cb(cur) ? total.push(cur) && total : total,[])
@@ -1382,7 +1435,10 @@ Array.prototype.myarray = function (cb) {
 
 特点
 
-• **返回布尔值**：回调函数返回 `true` 保留元素，`false` 丢弃。 • **适合场景**：条件筛选、数据去重（结合 `indexOf` 或 `Set`）。
+• **返回布尔值**：回调函数返回 `true` 保留元素，`false` 丢弃。
+• **适合场景**：条件筛选、数据去重（结合 `indexOf` 或 `Set`）。
+
+---
 
 **常见组合用法**
 
@@ -1402,9 +1458,12 @@ products
   .forEach(name => console.log(name)); // 输出 "Laptop", "Tablet"
 ```
 
+---
+
 **注意事项**
 
-1. **引用类型数据**   • `map` 和 `filter` 返回的新数组中的对象是原数组的引用（浅拷贝）。
+1. **引用类型数据**  
+   • `map` 和 `filter` 返回的新数组中的对象是原数组的引用（浅拷贝）。
 
    ```javascript
    const items = [{ value: 1 }];
@@ -1413,24 +1472,36 @@ products
    console.log(items[0].value); // 100（原数组被修改）
    ```
 
-2. **性能差异**   • `forEach` 通常比 `for` 循环慢，但在可读性要求高时优先使用。 • 大数据量时，链式调用 `map` + `filter` 可能生成中间数组，可改用 `reduce` 优化。
+2. **性能差异**  
+   • `forEach` 通常比 `for` 循环慢，但在可读性要求高时优先使用。
+   • 大数据量时，链式调用 `map` + `filter` 可能生成中间数组，可改用 `reduce` 优化。
 
-3. **空元素处理**   • 稀疏数组（如 `[1, , 3]`）中，空元素会被跳过。
+3. **空元素处理**  
+   • 稀疏数组（如 `[1, , 3]`）中，空元素会被跳过。
 
    ```javascript
    const arr = [1, , 3];
    arr.forEach(num => console.log(num)); // 输出 1, 3
    ```
 
+---
+
 **总结**
 
-• **`forEach`**：遍历数组并执行操作，无返回值。 • **`map`**：映射数组到新数组，适合数据转换。 • **`filter`**：筛选符合条件的元素，适合数据过滤。
+• **`forEach`**：遍历数组并执行操作，无返回值。
+• **`map`**：映射数组到新数组，适合数据转换。
+• **`filter`**：筛选符合条件的元素，适合数据过滤。
 
-根据需求选择方法： • 需要修改原数组 → `forEach` • 需要生成新数组 → `map` 或 `filter` • 需要组合操作 → 链式调用 `map` + `filter` + `reduce`
+根据需求选择方法：
+• 需要修改原数组 → `forEach`
+• 需要生成新数组 → `map` 或 `filter`
+• 需要组合操作 → 链式调用 `map` + `filter` + `reduce`
 
 #### 4. eval()
 
 在JavaScript中，`eval()` 是一个全局函数，用于将传入的字符串作为代码动态执行。它的主要用途和特点如下：
+
+---
 
 **1. 动态执行代码字符串**
 
@@ -1440,6 +1511,8 @@ products
 const code = 'console.log("Hello, world!")';
 eval(code); // 输出: Hello, world!
 ```
+
+---
 
 **2. 访问或修改当前作用域**
 
@@ -1453,6 +1526,8 @@ console.log(x); // 输出: 15
 
 **注意**：在严格模式（`'use strict'`）下，`eval()` 会创建自己的作用域，避免污染外部变量。
 
+---
+
 **3. 解析JSON（历史用法）**
 
 早期 JSON 未被广泛支持时，`eval()` 用于解析 JSON 字符串：
@@ -1464,6 +1539,8 @@ console.log(data.name); // 输出: Alice
 ```
 
 **现代替代方案**：使用 `JSON.parse()` 更安全、高效。
+
+---
 
 **4. 动态生成代码**
 
@@ -1485,9 +1562,15 @@ const value = eval('obj.' + key);
 console.log(value); // 输出: 100
 ```
 
+---
+
 **现代替代方案**
 
-• **动态代码执行**：使用 `Function` 构造函数。 • **JSON 解析**：`JSON.parse()`。 • **动态属性访问**：如 `obj[key]` 替代 `eval('obj.' + key)`。
+• **动态代码执行**：使用 `Function` 构造函数。
+• **JSON 解析**：`JSON.parse()`。
+• **动态属性访问**：如 `obj[key]` 替代 `eval('obj.' + key)`。
+
+---
 
 **总结**
 
@@ -1496,6 +1579,8 @@ console.log(value); // 输出: 100
 #### 5.replaceAll
 
 在 JavaScript 中，`replaceAll()` 是用于**替换字符串中所有匹配项**的方法（ES2021 新增）。与传统的 `replace()` 不同，它默认替换所有匹配内容，无需正则表达式的全局标志（`g`）。以下是详细用法及示例：
+
+---
 
 **1. 基础语法**
 
@@ -1507,6 +1592,8 @@ str.replaceAll(searchValue, replaceValue);
   - `searchValue`：要查找的内容（可以是字符串或带 `g` 标志的正则表达式）。
   - `replaceValue`：替换的内容（可以是字符串或函数）。
 - **返回值**：替换后的新字符串（原字符串不变）。
+
+---
 
 **2. 使用示例**
 
@@ -1535,6 +1622,8 @@ const newText = text.replaceAll(/\d/g, (match) => Number(match) * 2);
 console.log(newText); // "a2 b4 c6"
 ```
 
+---
+
 **3. 与 `replace()` 的区别**
 
 | 方法           | 替换所有匹配项 | 是否需要正则 `g` 标志 | 直接支持字符串替换全部 |
@@ -1556,9 +1645,12 @@ const result2 = text.replaceAll("cat", "bird"); // 无需正则
 console.log(result2); // "bird dog bird"
 ```
 
+---
+
 **4. 注意事项**
 
-1. **兼容性**   `replaceAll()` 是 ES2021 新增方法，旧浏览器（如 IE、早期 Chrome/Firefox）不支持。需通过 Babel 等工具转译或添加 Polyfill：
+1. **兼容性**  
+   `replaceAll()` 是 ES2021 新增方法，旧浏览器（如 IE、早期 Chrome/Firefox）不支持。需通过 Babel 等工具转译或添加 Polyfill：
 
    ```javascript
    if (!String.prototype.replaceAll) {
@@ -1568,7 +1660,8 @@ console.log(result2); // "bird dog bird"
    }
    ```
 
-2. **正则表达式必须带 `g` 标志**   如果 `searchValue` 是正则表达式，必须包含 `g` 标志，否则会报错：
+2. **正则表达式必须带 `g` 标志**  
+   如果 `searchValue` 是正则表达式，必须包含 `g` 标志，否则会报错：
 
    ```javascript
    // ❌ 报错：TypeError
@@ -1578,7 +1671,8 @@ console.log(result2); // "bird dog bird"
    "abc".replaceAll(/a/g, "x"); // "xbc"
    ```
 
-3. **特殊字符转义**   当 `searchValue` 是字符串时，如果包含正则特殊字符（如 `.*+?^${}()|[]\`），需手动转义：
+3. **特殊字符转义**  
+   当 `searchValue` 是字符串时，如果包含正则特殊字符（如 `.*+?^${}()|[]\`），需手动转义：
 
    ```javascript
    const text = "1 + 2 = 3";
@@ -1586,6 +1680,8 @@ console.log(result2); // "bird dog bird"
    const newText = text.replaceAll(escapedSearch, "-");
    console.log(newText); // "1 - 2 = 3"
    ```
+
+---
 
 **5. 常见应用场景**
 
@@ -1618,6 +1714,8 @@ console.log(result2); // "bird dog bird"
    console.log(result); // "Hello Alice, your code is 1234."
    ```
 
+---
+
 **总结**
 
 - **简单替换**：直接使用字符串参数（`replaceAll("old", "new")`）。
@@ -1626,17 +1724,24 @@ console.log(result2); // "bird dog bird"
 
 在JavaScript中，`find()`和`findAll()`方法通常用于数组或类数组对象的元素查找，但需要注意它们的原生支持情况和实际用法：
 
+---
+
 
 
 #### 6. **`find()` 方法**
 
-**原生支持**：是ES6标准方法   **用途**：查找数组中**第一个**满足条件的元素   **语法**：  
+**原生支持**：是ES6标准方法  
+**用途**：查找数组中**第一个**满足条件的元素  
+**语法**：  
 
 ```javascript
 array.find(callback(element, index, array))
 ```
 
-**特点**：   • 遍历数组直到找到第一个符合条件的元素   • 未找到时返回`undefined`   • 不会改变原数组  
+**特点**：  
+• 遍历数组直到找到第一个符合条件的元素  
+• 未找到时返回`undefined`  
+• 不会改变原数组  
 
 **示例**：  
 
@@ -1646,9 +1751,13 @@ const result = numbers.find(num => num > 10);
 console.log(result); // 12（第一个大于10的元素）
 ```
 
+---
+
 #### 7.join()
 
 JavaScript 中的 `join()` 函数是数组对象的内置方法，用于将数组的所有元素连接成一个字符串，并支持自定义分隔符。以下是其核心要点：
+
+---
 
 一、基本语法与参数
 
@@ -1656,7 +1765,10 @@ JavaScript 中的 `join()` 函数是数组对象的内置方法，用于将数�
 array.join([separator])
 ```
 
-• **`separator`（可选）**：指定元素间的分隔符，默认为逗号 `,`。 • **返回值**：由数组元素组成的字符串，若数组为空则返回空字符串 `""`。
+• **`separator`（可选）**：指定元素间的分隔符，默认为逗号 `,`。
+• **返回值**：由数组元素组成的字符串，若数组为空则返回空字符串 `""`。
+
+---
 
 二、使用示例
 
@@ -1680,21 +1792,25 @@ array.join([separator])
    console.log(colors.join('')); // 输出："redgreenblue"
    ```
 
+---
+
 三、特殊元素处理
 
 • **`null`/`undefined`**：会被转换为空字符串。
 
-```javascript
+  ```javascript
  const arr = [null, 'a', undefined];
  console.log(arr.join('|')); // 输出："|a|"
-```
+  ```
 
 • **非字符串元素**（如数字、布尔值）：自动转换为字符串类型。
 
-```javascript
+  ```javascript
  const nums = [1, 2, 3];
  console.log(nums.join('+')); // 输出："1+2+3"
-```
+  ```
+
+---
 
 四、常见应用场景
 
@@ -1727,15 +1843,25 @@ array.join([separator])
 
 `reduce()` 是 JavaScript 中功能最强大的数组高阶函数，它通过遍历数组将元素**累积**为一个最终值，适用于汇总计算、数据转换、结构重组等场景。以下是详细用法和示例：
 
+---
+
 **核心语法**
 
 ```javascript
 array.reduce(callback(accumulator, currentValue, index, array), initialValue);
 ```
 
-• **参数**：  • **`callback`**：处理每个元素的函数，返回新的累加值。    ◦ `accumulator`：累积值（上一次回调的返回值或初始值）。    ◦ `currentValue`：当前处理的元素。    ◦ `index`（可选）：当前元素索引。    ◦ `array`（可选）：原数组。  • **`initialValue`**（可选）：初始累积值（若省略，默认使用数组第一个元素）。
+• **参数**：
+  • **`callback`**：处理每个元素的函数，返回新的累加值。
+    ◦ `accumulator`：累积值（上一次回调的返回值或初始值）。
+    ◦ `currentValue`：当前处理的元素。
+    ◦ `index`（可选）：当前元素索引。
+    ◦ `array`（可选）：原数组。
+  • **`initialValue`**（可选）：初始累积值（若省略，默认使用数组第一个元素）。
 
 • **返回值**：最终累积结果（可以是任意类型：数字、数组、对象等）。
+
+---
 
 **基础用法示例**
 
@@ -1748,14 +1874,21 @@ const sum = numbers.reduce((acc, num) => acc + num, 0);
 console.log(sum); // 10
 ```
 
-• **步骤解析**：  • 初始值 `acc = 0`  • 第1次：`acc = 0 + 1 = 1`  • 第2次：`acc = 1 + 2 = 3`  • 第3次：`acc = 3 + 3 = 6`  • 第4次：`acc = 6 + 4 = 10`
+• **步骤解析**：
+  • 初始值 `acc = 0`
+  • 第1次：`acc = 0 + 1 = 1`
+  • 第2次：`acc = 1 + 2 = 3`
+  • 第3次：`acc = 3 + 3 = 6`
+  • 第4次：`acc = 6 + 4 = 10`
 
-1. **查找最大值**
+2. **查找最大值**
 
 ```javascript
 const max = numbers.reduce((acc, num) => Math.max(acc, num), -Infinity);
 console.log(max); // 4
 ```
+
+---
 
 **进阶用法示例**
 
@@ -1785,7 +1918,7 @@ console.log(groupedByRole);
 // }
 ```
 
-1. **扁平化嵌套数组**
+2. **扁平化嵌套数组**
 
 ```javascript
 const nestedArray = [[1, 2], [3, 4], [5]];
@@ -1794,7 +1927,7 @@ const flatArray = nestedArray.reduce((acc, arr) => acc.concat(arr), []);
 console.log(flatArray); // [1, 2, 3, 4, 5]
 ```
 
-1. **统计元素出现次数**
+3. **统计元素出现次数**
 
 ```javascript
 const fruits = ["apple", "banana", "apple", "orange", "banana"];
@@ -1807,17 +1940,21 @@ const count = fruits.reduce((acc, fruit) => {
 console.log(count); // { apple: 2, banana: 2, orange: 1 }
 ```
 
+---
+
 **关键注意事项**
 
-1. **始终提供初始值**   • 空数组 + 无初始值 → 抛出错误：
+1. **始终提供初始值**  
+   • 空数组 + 无初始值 → 抛出错误：
 
-   ```javascript
+     ```javascript
    [].reduce((acc, num) => acc + num); // TypeError
-   ```
+     ```
 
    • 安全做法：明确设置初始值（如 `0`、`[]`、`{}`）。
 
-2. **不可变操作**   避免直接修改 `accumulator`，应返回新对象/数组：
+2. **不可变操作**  
+   避免直接修改 `accumulator`，应返回新对象/数组：
 
    ```javascript
    // ❌ 错误：直接修改 acc
@@ -1833,7 +1970,8 @@ console.log(count); // { apple: 2, banana: 2, orange: 1 }
    }), {});    ????????
    ```
 
-3. **替代 `map` 或 `filter`**   `reduce` 可以实现其他方法的功能，但需权衡可读性：
+3. **替代 `map` 或 `filter`**  
+   `reduce` 可以实现其他方法的功能，但需权衡可读性：
 
    ```javascript
    // 用 reduce 实现 map
@@ -1843,9 +1981,21 @@ console.log(count); // { apple: 2, banana: 2, orange: 1 }
    const filtered = arr.reduce((acc, num) => num % 2 === 0 ? [...acc, num] : acc, []);
    ```
 
+---
+
 **总结**
 
-• **适用场景**：  • **聚合计算**（总和、最大值、平均值）。  • **数据重组**（数组→对象、嵌套结构扁平化）。  • **复杂转换**（多步处理合并为单次遍历）。 • **优势**：  • 灵活处理任意类型的累积值。  • 单次遍历完成复杂操作，提升性能（相比多次链式调用 `map` + `filter`）。 • **替代方案**：  • 简单遍历 → `forEach`  • 数据转换 → `map`  • 元素筛选 → `filter`
+• **适用场景**：
+  • **聚合计算**（总和、最大值、平均值）。
+  • **数据重组**（数组→对象、嵌套结构扁平化）。
+  • **复杂转换**（多步处理合并为单次遍历）。
+• **优势**：
+  • 灵活处理任意类型的累积值。
+  • 单次遍历完成复杂操作，提升性能（相比多次链式调用 `map` + `filter`）。
+• **替代方案**：
+  • 简单遍历 → `forEach`
+  • 数据转换 → `map`
+  • 元素筛选 → `filter`
 
 ### 11. 对象类型遍历方法
 
@@ -1875,6 +2025,7 @@ console.log(Object.keys(ob) instanceof Array) //true
 
 ```
 console.log(Object.values(ob) ) //[200, '请求成功', {…}]
+
 ```
 
 
@@ -1903,9 +2054,13 @@ Object.keys(ob).forEach(key=>{
 
 以map函数为例：
 
+
 在 JavaScript 中，`map()` 函数返回的新数组中的元素是原数组元素的 **浅拷贝（Shallow Copy）**。这意味着：
 
-• 对于 **基本类型（Primitive Types）**（如 `number`, `string`, `boolean`），新数组会存储这些值的独立副本。 • 对于 **引用类型（Reference Types）**（如 `object`, `array`, `function`），新数组中的元素与原数组中的元素指向 **同一内存地址**，修改其中一个会影响另一个。
+• 对于 **基本类型（Primitive Types）**（如 `number`, `string`, `boolean`），新数组会存储这些值的独立副本。
+• 对于 **引用类型（Reference Types）**（如 `object`, `array`, `function`），新数组中的元素与原数组中的元素指向 **同一内存地址**，修改其中一个会影响另一个。
+
+---
 
 **如何证明 `map()` 是浅拷贝？**
 
@@ -1923,7 +2078,9 @@ console.log(original[0].value); // 100（原数组也被修改）
 
 **结果**：原数组中的对象被修改，说明 `map()` 复制的是引用地址，而非对象本身。
 
-1. **针对基本类型（数字）的验证**
+---
+
+2. **针对基本类型（数字）的验证**
 
 ```javascript
 const original = [1, 2, 3];
@@ -1937,21 +2094,29 @@ console.log(original[0]); // 1（原数组未被修改）
 
 **结果**：原数组的值未受影响，说明基本类型是独立的副本。
 
+---
+
 **为什么说这是“浅拷贝”？**
 
-`map()` 只复制最外层数据： • 对于对象，新数组中的元素和原数组中的元素指向同一个对象（**共享引用**）。 • 如果对象内部有嵌套结构（如对象中的对象），修改嵌套部分仍然会影响原数据：
+`map()` 只复制最外层数据：
+• 对于对象，新数组中的元素和原数组中的元素指向同一个对象（**共享引用**）。
+• 如果对象内部有嵌套结构（如对象中的对象），修改嵌套部分仍然会影响原数据：
 
-```javascript
+  ```javascript
   const original = [{ data: { value: 1 } }];
   const mapped = original.map(item => item);
 
   mapped[0].data.value = 100;
   console.log(original[0].data.value); // 100（原数据被修改）
-```
+  ```
+
+---
 
 **深拷贝**
 
 **深拷贝（Deep Copy）** 是指创建一个新对象或数组，并递归地复制其所有嵌套层级的属性和元素，使得新对象与原对象**完全独立**，修改新对象不会影响原对象。与**浅拷贝（Shallow Copy）** 不同，深拷贝会逐层复制所有引用类型的数据，而不是仅复制引用地址。
+
+---
 
 **深拷贝 vs 浅拷贝**
 
@@ -1994,6 +2159,8 @@ deepCopy.address.city = "Shanghai";
 console.log(original.address.city); // "Beijing"（原对象不受影响）
 ```
 
+---
+
 **如何实现深拷贝？**
 
 1. **手动递归复制**
@@ -2011,30 +2178,32 @@ function deepClone(obj) {
 }
 ```
 
-1. **`JSON.parse(JSON.stringify())`**
+2. **`JSON.parse(JSON.stringify())`**
 
-快速但局限性大： • **无法复制**：函数、`undefined`、`Symbol`、循环引用。 • **不保留原型链**。
+快速但局限性大：
+• **无法复制**：函数、`undefined`、`Symbol`、循环引用。
+• **不保留原型链**。
 
 ```javascript
 const copy = JSON.parse(JSON.stringify(original));
 ```
 
-1. **第三方库（推荐）**
+3. **第三方库（推荐）**
 
 • **Lodash** 的 `_.cloneDeep()`：
 
-```javascript
+  ```javascript
 import _ from "lodash";
 const copy = _.cloneDeep(original);
-```
+  ```
 
 • **jQuery** 的 `$.extend(true, {}, obj)`：
 
-```javascript
+  ```javascript
 const copy = $.extend(true, {}, original);
-```
+  ```
 
-1. **现代 JavaScript API**
+4. **现代 JavaScript API**
 
 使用 `structuredClone`（支持大多数现代浏览器）：
 
@@ -2042,17 +2211,27 @@ const copy = $.extend(true, {}, original);
 const copy = structuredClone(original);
 ```
 
-• **支持**：循环引用、`Date`、`RegExp`、`Map`、`Set` 等。 • **不支持**：函数、DOM 节点。
+• **支持**：循环引用、`Date`、`RegExp`、`Map`、`Set` 等。
+• **不支持**：函数、DOM 节点。
+
+---
 
 **深拷贝的应用场景**
 
-1. **状态管理（如 Redux）**   确保每次状态更新生成全新对象，避免副作用。
-2. **数据隔离**   保护原始数据不被意外修改（如配置对象、API 响应数据）。
-3. **复杂对象操作**   需要修改嵌套数据但保留原数据的完整性。
+1. **状态管理（如 Redux）**  
+   确保每次状态更新生成全新对象，避免副作用。
+2. **数据隔离**  
+   保护原始数据不被意外修改（如配置对象、API 响应数据）。
+3. **复杂对象操作**  
+   需要修改嵌套数据但保留原数据的完整性。
+
+---
 
 **总结**
 
-• **深拷贝**：递归复制所有层级的数据，实现完全独立的对象副本。 • **关键工具**：`structuredClone`、`JSON.parse(JSON.stringify())`、Lodash 的 `cloneDeep`。 • **注意事项**：根据数据类型选择合适方法，避免因未完全复制导致的逻辑错误。
+• **深拷贝**：递归复制所有层级的数据，实现完全独立的对象副本。
+• **关键工具**：`structuredClone`、`JSON.parse(JSON.stringify())`、Lodash 的 `cloneDeep`。
+• **注意事项**：根据数据类型选择合适方法，避免因未完全复制导致的逻辑错误。
 
 ### 13...args:**拓展运算符**
 
@@ -2099,7 +2278,7 @@ const original = {
 - **数组中的元素**：在没有展开之前，数组是一个整体，里面的元素是“不独立”的，因为它们被包裹在数组结构中。
 - **对象的属性**：在没有展开之前，对象的属性也是“不独立”的，因为它们被包裹在对象结构中。
 
-1. **举例说明“不独立”和“独立”的区别**
+2. **举例说明“不独立”和“独立”的区别**
 
 **数组的例子**
 
@@ -2149,7 +2328,7 @@ const obj = { name: "Alice", age: 25 };
 
   这时，`name`和`age`就被独立地提取出来了。
 
-1. **常见的“不独立”和“独立”的场景**
+3. **常见的“不独立”和“独立”的场景**
 
 **不独立的场景**
 
@@ -2226,7 +2405,7 @@ const obj = { name: "Alice", age: 25 };
 
 
 
-1. **为什么说“展开”**
+2. **为什么说“展开”**
 
 “展开”并不意味着元素会脱离数组结构，而是说它们不再是原数组的一部分，而是被重新组合到一个**新的数组**中。换句话说，`newArr` 是一个独立的数组，与原数组 `arr` 没有直接关联。
 
@@ -2238,7 +2417,7 @@ console.log(newArr); // 输出：[1, 2, 3]
 
 虽然 `newArr` 仍然是一个数组，但它的内容是通过“展开”原数组 `arr` 的元素后重新组合而成的。
 
-1. **展开和浅拷贝的关系**
+3. **展开和浅拷贝的关系**
 
 对于数组，`const newArr = [...arr];` 实际上是一个**浅拷贝**操作。这意味着：
 
@@ -2258,7 +2437,7 @@ console.log(newArr); // 输出：[1, 2, { name: "Alice" }]
 - 数字 `1` 和 `2` 是基本数据类型，它们被直接复制到 `newArr` 中。
 - 对象 `{ name: "Alice" }` 是引用类型，`newArr` 中的第三个元素仍然指向原对象。
 
-1. **展开的意义**
+4. **展开的意义**
 
 尽管 `newArr` 仍然是一个数组，但“展开”操作的意义在于：
 
@@ -2302,9 +2481,9 @@ fun();      // 输出：3
 fun();      // 输出：4
 ```
 
-
-
-funOne()函数的返回值为函数funTwo(),所以执行fun()，就等于执行funTwo(),每次执行fun都是从内部函数funTwo开始执行的，并不会使得num归零。
+> [!note]
+>
+> funOne()函数的返回值为函数funTwo(),所以执行fun()，就等于执行funTwo(),每次执行fun都是从内部函数funTwo开始执行的，并不会使得num归零。
 
 高级用法：在实际开发中，通常会将闭包与匿名函数结合使用
 
@@ -2348,6 +2527,7 @@ console.log(mentalMethod('峨眉', '武当', '少林')());
 //战胜峨眉,武当,少林
 //战胜峨眉,武当,少林
 //战胜峨眉,武当,少林
+
 ```
 
 简写：
@@ -2426,6 +2606,9 @@ function mentalMethod(...args) {
     </li>
   </ul>
 </div>
+```
+
+```
 // TODO：待补充代码
 
 data() {
@@ -2535,6 +2718,8 @@ methods: {
 
 在 JavaScript 中，`onchange` 事件用于在表单元素的值发生**变化且失去焦点**时触发特定的操作。以下是它的使用方法和示例：
 
+---
+
 一、基本用法
 
 1. 直接在 HTML 元素中绑定
@@ -2558,7 +2743,7 @@ methods: {
 </script>
 ```
 
-1. 通过 JavaScript 动态绑定
+2. 通过 JavaScript 动态绑定
 
 ```javascript
 const inputElement = document.getElementById("myInput");
@@ -2574,6 +2759,8 @@ selectElement.addEventListener("change", function(event) {
   console.log("选中的值:", event.target.value);
 });
 ```
+
+---
 
 二、适用场景
 
@@ -2593,6 +2780,8 @@ selectElement.addEventListener("change", function(event) {
    </script>
    ```
 
+---
+
 三、与 `oninput` 的区别
 
 - **`onchange`**：值变化 **且元素失去焦点** 后触发。
@@ -2604,6 +2793,8 @@ document.getElementById("myInput").addEventListener("input", function(e) {
   console.log("实时输入:", e.target.value);
 });
 ```
+
+---
 
 四、注意事项
 
@@ -2618,6 +2809,8 @@ document.getElementById("myInput").addEventListener("input", function(e) {
      }
    });
    ```
+
+---
 
 完整示例
 
@@ -2693,6 +2886,8 @@ var province = document.getElementById("param_province");
 
 在 JavaScript 中，`<select>` 元素的 `options` 属性表示下拉菜单（`<select>`）中所有 `<option>` 子元素的集合。你的代码片段中操作的是 `<option>` 元素的 `text` 和 `value` 属性。以下是详细解释：
 
+---
+
 一、`options` 属性
 
 - **`options`** 是 `<select>` 元素的属性，返回一个 `HTMLOptionsCollection`（类似数组的对象），包含所有 `<option>` 元素。
@@ -2704,6 +2899,7 @@ var province = document.getElementById("param_province");
   const firstOption = province.options[0];
   //内容可能为：
   <option>上海</option>
+  
   ```
 
 二、`<option>` 的属性
@@ -2734,6 +2930,8 @@ var province = document.getElementById("param_province");
      <option value="BJ">北京</option>  <!-- .value 是 "BJ" -->
      ```
 
+---
+
 三、你的代码行为
 
 你的代码做了以下事情：
@@ -2754,6 +2952,8 @@ for (let i = 0; i < provinces.length; i++) {
 ```
 
 
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### ~动态设置样式
 
@@ -2790,6 +2990,8 @@ function createWatermark(text, color, deg, opacity, count) {
 
 
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ### ~获取集合set的值
 
 ```
@@ -2806,9 +3008,13 @@ set.forEach(value => console.log(value)); // 1, 2, 3
 
 
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ### ~Map和对象的区别
 
 在 JavaScript 中，`Map` 和普通对象（`Object`）都可以用来存储键值对，但它们在设计目的和使用场景上有显著差异。以下是两者的核心区别：
+
+---
 
 **1. 键（Key）的类型**
 
@@ -2817,6 +3023,8 @@ set.forEach(value => console.log(value)); // 1, 2, 3
 | **键的类型** | 允许 **任何类型**（对象、函数、NaN等） | 键只能是 **字符串** 或 **Symbol**（其他类型会被自动转换） |
 | **示例**     | `map.set({}, 'value')`                 | `obj[123] = 'value'` → 键会被转为字符串 `"123"`           |
 
+---
+
 **2. 键的顺序**
 
 | **特性**     | **Map**                                               | **Object**                                                   |
@@ -2824,12 +3032,16 @@ set.forEach(value => console.log(value)); // 1, 2, 3
 | **插入顺序** | **严格保留** 键值对的插入顺序                         | 普通对象不保证顺序（ES6 后虽然遍历顺序按插入顺序，但存在例外，如数字键会被排序） |
 | **示例**     | `map.set('a', 1).set('b', 2)` → 遍历顺序是 `'a', 'b'` | `{a:1, 2:'b'}` → 遍历顺序可能为 `'2', 'a'`                   |
 
+---
+
 **3. 性能差异**
 
 | **场景**         | **Map**                    | **Object**                         |
 | ---------------- | -------------------------- | ---------------------------------- |
 | **频繁增删键值** | 优化过的增删操作，性能更好 | 增删性能较差（受原型链等因素影响） |
 | **大数据量**     | 更适合存储大量动态键值对   | 可能因哈希表实现导致性能下降       |
+
+---
 
 **4. 内置方法与属性**
 
@@ -2839,12 +3051,16 @@ set.forEach(value => console.log(value)); // 1, 2, 3
 | **迭代方法** | 原生支持 `forEach`、`keys()`、`values()` 等 | 需通过 `Object.keys(obj)` 转换后迭代               |
 | **默认键**   | 无默认键（纯净存储）                        | 继承原型链上的属性（如 `constructor`, `toString`） |
 
+---
+
 **5. 序列化与兼容性**
 
 | **特性**        | **Map**                                | **Object**   |
 | --------------- | -------------------------------------- | ------------ |
 | **JSON 序列化** | 无法直接通过 `JSON.stringify()` 序列化 | 可直接序列化 |
 | **兼容性**      | ES6+ 支持                              | 所有环境支持 |
+
+---
 
 **6. 典型使用场景**
 
@@ -2854,6 +3070,8 @@ set.forEach(value => console.log(value)); // 1, 2, 3
 | **需要保证顺序** | Map（如记录操作步骤）       | 记录用户操作的时间线              |
 | **频繁增删键值** | Map（性能更优）             | 实时更新数据集合                  |
 | **简单配置存储** | Object（直观、易序列化）    | 存储静态配置：`{ theme: 'dark' }` |
+
+---
 
 **代码示例**
 
@@ -2931,7 +3149,7 @@ parent.appendChild(li,'nihaoma',document.createElement('div'))//只有个第一�
 
 3.innerHTML
 
-- **功能**：通过HTML字符串直接替换或追加内容（自动解析为DOM）。
+- **功能**：通过HTML==字符串==直接替换或追加内容（自动解析为DOM）。
 
 ```
 const parent = document.getElementById('list');
@@ -2963,7 +3181,7 @@ parent.appendChild(fragment);
 
 在 HTML 的 `div` 元素中，`innerHTML` 和 `textContent` 是两种常用的属性，它们的核心区别在于 **对内容解析方式的不同**。以下是详细对比：
 
-![image-20250307105053155](.\assets\image-20250307105053155.png)
+![image-20250307105053155](./assets/image-20250307105053155.png)
 
 二、实际示例
 
@@ -2998,7 +3216,7 @@ html
 - 包含完整的 HTML 标签和结构
 - `<script>` 标签会被保留（但不会执行）
 
-1. 使用 `textContent`
+2. 使用 `textContent`
 
 ```javascript
 console.log(document.getElementById('example').textContent);
@@ -3020,6 +3238,8 @@ console.log(document.getElementById('example').textContent);
 
 `document.location.reload()` 是 JavaScript 中用于重新加载当前页面的方法。它的作用类似于用户手动点击浏览器的刷新按钮，但可以通过代码控制。以下是它的详细用法和注意事项：
 
+---
+
 **基本语法**
 
 ```javascript
@@ -3029,6 +3249,8 @@ document.location.reload(forceGet = false);
 - **参数** `forceGet`（可选）：
   - **默认值**：`false`（从浏览器缓存重新加载页面）。
   - **设为 `true`**：强制从服务器重新加载页面（绕过缓存）。
+
+---
 
 **使用场景**
 
@@ -3041,12 +3263,14 @@ document.location.reload();
 location.reload();
 ```
 
-1. **强制从服务器重新加载（绕过缓存）**
+2. **强制从服务器重新加载（绕过缓存）**
 
 ```javascript
 // 强制从服务器获取最新内容（忽略缓存）
 document.location.reload(true);
 ```
+
+---
 
 **示例**
 
@@ -3071,6 +3295,8 @@ function submitForm() {
   location.reload(true); // 绕过缓存
 }
 ```
+
+---
 
 **注意事项**
 
@@ -3097,10 +3323,14 @@ function submitForm() {
 
    - 若页面是通过 `window.open()` 打开的，某些浏览器可能限制跨域页面的 `reload()` 调用。
 
+---
+
 **替代写法**
 
 - `window.location.reload()` 与 `document.location.reload()` 完全等价。
 - 更简洁的写法是直接使用 `location.reload()`（省略 `window` 或 `document`）。
+
+---
 
 **常见错误**
 
@@ -3120,6 +3350,8 @@ document.querySelector("button").onclick = location.reload();
 document.querySelector("button").onclick = () => location.reload();
 ```
 
+---
+
 **总结**
 
 - **普通刷新**：`location.reload()` 或 `location.reload(false)`。
@@ -3131,6 +3363,8 @@ document.querySelector("button").onclick = () => location.reload();
 
 “微任务队列”（Microtask Queue）是 JavaScript 事件循环（Event Loop）中的一个核心概念，它和“宏任务队列”（Macrotask Queue）共同决定了异步代码的执行顺序。理解微任务队列是掌握 JavaScript 异步机制的关键！
 
+---
+
 **什么是微任务队列？**
 
 1. **微任务（Microtask）**：
@@ -3139,6 +3373,7 @@ document.querySelector("button").onclick = () => location.reload();
      - `MutationObserver`（监听 DOM 变化的 API）
      - `queueMicrotask()` 手动添加的微任务
    - **特点**：微任务会在当前同步代码执行完毕后、下一个宏任务之前**立即全部执行**。
+
 2. **宏任务（Macrotask）**：
    - 一类优先级较低的异步任务，例如：
      - `setTimeout` / `setInterval`
@@ -3146,6 +3381,8 @@ document.querySelector("button").onclick = () => location.reload();
      - `requestAnimationFrame`
      - I/O 操作（如文件读写）
    - **特点**：宏任务会在事件循环的每一轮（每个“tick”）中执行**一个**。
+
+---
 
 **事件循环的执行顺序**
 
@@ -3157,6 +3394,8 @@ document.querySelector("button").onclick = () => location.reload();
 3. 检查**宏任务队列**：
    - 取出**第一个宏任务**执行。
 4. 重复上述过程。
+
+---
 
 🌰 **举个例子：微任务 vs 宏任务**
 
@@ -3186,12 +3425,16 @@ console.log("同步代码 2");
 2. 检查微任务队列，发现 Promise 的回调，执行并输出 `微任务（Promise）`。
 3. 最后执行宏任务队列中的 `setTimeout`，输出 `宏任务（setTimeout）`。
 
+---
+
 **为什么需要微任务？**
 
 微任务的**高优先级特性**让某些操作可以更及时地执行。例如：
 
 - **Promise 链式调用**：保证多个 `.then()` 连续执行，避免中间插入其他任务。
 - **DOM 更新**：Vue/React 等框架利用微任务在 DOM 更新后立即执行回调（如 `Vue.nextTick()`）。
+
+---
 
 **关键区别：微任务 vs 宏任务**
 
@@ -3211,6 +3454,8 @@ console.log("同步代码 2");
 #### **1.如何返回一个promise**
 
 在 JavaScript 中返回一个 Promise 对象需要遵循其基本语法规则。以下是不同场景下的实现方式：
+
+---
 
 关于，执行顺序可以暂时先简单的这样来理解：在promise中有一个状态变量，初始为pending，`resolve`函数的作用是，将`Promise`对象的状态从“未完成”变为“成功”（即从 pending 变为 resolved），在异步操作成功时调用，并将异步操作的结果，作为参数传递出去；`reject`函数的作用是，将`Promise`对象的状态从“未完成”变为“失败”（即从 pending 变为 rejected），在异步操作失败时调用，并将异步操作报出的错误，作为参数传递出去。
 
@@ -3264,6 +3509,8 @@ function reject(error){
 
 */
 ```
+
+---
 
 二、包装回调函数为 Promise
 
@@ -3319,6 +3566,8 @@ const promisefy = (fn) => {
       })
   })
 }
+
+
 ```
 
 
@@ -3326,6 +3575,8 @@ const promisefy = (fn) => {
 
 
 
+
+---
 
 
 
@@ -3352,6 +3603,8 @@ fetchData()
   .catch(error => console.error(error));
 ```
 
+---
+
 四、链式操作中返回新的 Promise
 
 **场景**：在 `.then()` 中返回新 Promise 以维持链式调用
@@ -3373,6 +3626,8 @@ step1()
   .then(finalResult => console.log(finalResult)) // 20
   .catch(error => console.error(error));
 ```
+
+---
 
 五、常见错误及修复
 
@@ -3402,6 +3657,8 @@ function riskyOperation() {
 // ✅ 修复：添加 catch
 riskyOperation().catch(err => console.error(err));
 ```
+
+---
 
 #### 2.使用promise重构普通函数
 
@@ -3448,16 +3705,21 @@ fetchData("https://api.example.com")
 1. **同步执行执行器函数（Executor）**：
    - 当你创建 Promise 时，传入的 `(resolve, reject) => { ... }` 函数会**立即同步执行**。
    - 此时 Promise 的状态为 `pending`。
+
 2. **调用 `resolve()` 或 `reject()`**：
    - **`resolve(value)`**：同步调用，将 Promise 状态从 `pending` 变为 `fulfilled`，并保存 `value`。
    - **`reject(reason)`**：同步调用，将 Promise 状态从 `pending` 变为 `rejected`，并保存 `reason`。
    - 一旦状态改变（`fulfilled` 或 `rejected`），**不可逆转**。
+
 3. **注册回调（`.then()` / `.catch()`）**：
    - 通过 `.then(onFulfilled, onRejected)` 或 `.catch(onRejected)` 注册回调函数。
    - 这些回调**不会立即执行**！它们会被放入**微任务队列**（Microtask Queue），等待当前同步代码执行完毕后才会触发。
+
 4. **异步执行回调**：
    - 当所有同步代码执行完毕，事件循环会检查**微任务队列**，依次执行其中的回调。
    - 例如：如果 Promise 被 `resolve('结果')`，则 `.then((value) => { ... })` 中的 `onFulfilled` 回调会异步执行，并收到 `value`。
+
+---
 
 **流程修正与关键细节**：
 
@@ -3500,6 +3762,8 @@ fetchData("https://api.example.com")
     });
   ```
 
+---
+
 **总结你的描述**：
 
 - **正确**：调用 `resolve()` 或 `reject()` 会同步改变 Promise 的状态，并保存值。
@@ -3509,6 +3773,8 @@ fetchData("https://api.example.com")
 
 - **错误认知**：认为 `resolve()` 后 `.then()` 回调会立即执行。
 - **正确理解**：`resolve()` 只是同步改变状态并保存值，回调必须等待同步代码执行完毕后才会异步触发。
+
+---
 
 通过这样的流程梳理，可以避免因同步/异步混淆导致的 Bug，例如在 `resolve()` 后立即操作依赖回调结果的代码时出错。希望这个解释能帮你彻底掌握 Promise 的执行机制！ 😊
 
@@ -3522,9 +3788,11 @@ fetchData("https://api.example.com")
 
 
 
-1. **`instanceof`的作用**   该运算符通过原型链检查判断对象是否属于特定类型。当执行 `key instanceof Array` 返回 `true` 时，说明变量 `key` 的原型链中存在 `Array.prototype`，即 `key` 是通过数组构造函数创建的实例。
+1. **`instanceof`的作用**  
+   该运算符通过原型链检查判断对象是否属于特定类型。当执行 `key instanceof Array` 返回 `true` 时，说明变量 `key` 的原型链中存在 `Array.prototype`，即 `key` 是通过数组构造函数创建的实例。
 
-2. **`typeof`的局限性**   `typeof` 返回基本类型标识符，但对引用类型只能统一返回 `"object"`，包括数组、普通对象、`null` 等。例如：
+2. **`typeof`的局限性**  
+   `typeof` 返回基本类型标识符，但对引用类型只能统一返回 `"object"`，包括数组、普通对象、`null` 等。例如：
 
    ```javascript
    typeof [] === "object"  // true
@@ -3532,9 +3800,9 @@ fetchData("https://api.example.com")
    typeof null === "object" // true（历史遗留问题）
    ```
 
-
-
-+('a') 意思是将字符串a转化为Number类型，结果为NAN，这是一种特殊的Number类型，仍然属于Number的范畴，因此console.log(typeof +('a'))的结果为Number
+> [!Note]
+>
+> +('a') 意思是将字符串a转化为Number类型，结果为NAN，这是一种特殊的Number类型，仍然属于Number的范畴，因此console.log(typeof +('a'))的结果为Number
 
 二、具体场景解析
 
@@ -3547,9 +3815,11 @@ console.log(typeof key); // "object" → 所有引用类型的通用标识
 
 看似矛盾的深层原因：
 
-1. **数组的本质**   数组在JS中属于特殊对象（`Array`继承自`Object`），`typeof`无法区分数组与普通对象。
+1. **数组的本质**  
+   数组在JS中属于特殊对象（`Array`继承自`Object`），`typeof`无法区分数组与普通对象。
 
-2. **原型链机制验证**   `instanceof`会检查原型链关系：
+2. **原型链机制验证**  
+   `instanceof`会检查原型链关系：
 
    ```javascript
    const arr = [];
@@ -3569,7 +3839,9 @@ console.log(typeof key); // "object" → 所有引用类型的通用标识
 四、总结建议
 
 1. **优先使用专用方法**：涉及数组判断时，推荐 `Array.isArray()` 代替 `instanceof`，避免跨窗口/框架的兼容性问题（如iframe环境下的原型链隔离）
-2. **理解类型系统特性**：   • `typeof` 适合基本类型判断（`number/string/boolean`等） • `instanceof` 用于对象类型层级验证
+2. **理解类型系统特性**：  
+   • `typeof` 适合基本类型判断（`number/string/boolean`等）
+   • `instanceof` 用于对象类型层级验证
 3. **复杂场景的综合方案**：结合多种方法实现可靠类型检测：
 
 ```javascript
@@ -3606,6 +3878,9 @@ function getType(obj) {
             <input type="checkbox" name="place" id="outdoor" value="3" />户外
           </div>
         </div>
+```
+
+```
 获取性别
 const gender = document.querySelector('[type='radio']:checked').nextSibling.textContent.trim()
 //获取已勾选的radio，获取其下一个元素，获取下一个元素的文本内容，去除开头和结尾的空格
@@ -3620,9 +3895,12 @@ placeArr =placeArr.join('、')
 
 ### -如何获取上一个和下一个兄弟节点
 
+---
+
 一、`nextSibling` 属性
 
-**定义**：   返回当前节点的**下一个兄弟节点**，包括元素节点、文本节点（如换行/空格）或注释节点。
+**定义**：  
+返回当前节点的**下一个兄弟节点**，包括元素节点、文本节点（如换行/空格）或注释节点。
 
 **语法**：
 
@@ -3632,7 +3910,9 @@ const nextNode = node.nextSibling;
 
 **特点**：
 
-**返回值**： • 元素节点（如`<div>`）、文本节点（如换行符）或注释节点。 • 若不存在下一个兄弟节点，返回`null`。
+**返回值**：
+• 元素节点（如`<div>`）、文本节点（如换行符）或注释节点。
+• 若不存在下一个兄弟节点，返回`null`。
 
 **示例**：
 
@@ -3647,9 +3927,12 @@ const nextNode = node.nextSibling;
 </script>
 ```
 
+---
+
 二、`nextElementSibling` 属性
 
-**定义**：   返回当前节点的**下一个兄弟元素节点**，**仅包含元素节点**（忽略文本、注释节点）。
+**定义**：  
+返回当前节点的**下一个兄弟元素节点**，**仅包含元素节点**（忽略文本、注释节点）。
 
 **语法**：
 
@@ -3659,8 +3942,10 @@ const nextElement = node.nextElementSibling;
 
 **特点**：
 
-1. **返回值**： • 元素节点或`null`（若不存在）。
-2. **优势**： • 直接跳过文本节点，避免手动过滤。
+1. **返回值**：
+   • 元素节点或`null`（若不存在）。
+2. **优势**：
+   • 直接跳过文本节点，避免手动过滤。
 
 **示例**：
 
@@ -3677,9 +3962,12 @@ const nextElement = node.nextElementSibling;
 </script>
 ```
 
+---
+
 三、`previousElementSibling` 属性
 
-**定义**：   返回当前节点的**上一个兄弟元素节点**，行为与`nextElementSibling`类似，但方向相反。
+**定义**：  
+返回当前节点的**上一个兄弟元素节点**，行为与`nextElementSibling`类似，但方向相反。
 
 **语法**：
 
@@ -3689,8 +3977,10 @@ const prevElement = node.previousElementSibling;
 
 **特点**：
 
-1. **返回值**： • 元素节点或`null`。
-2. **应用场景**： • 表单验证时定位前一个输入字段，或遍历菜单项。
+1. **返回值**：
+   • 元素节点或`null`。
+2. **应用场景**：
+   • 表单验证时定位前一个输入字段，或遍历菜单项。
 
 **示例**：
 
@@ -3706,6 +3996,8 @@ const prevElement = node.previousElementSibling;
 </script>
 ```
 
+---
+
 对比总结
 
 | 属性                     | 返回内容             | 兼容性             | 适用场景               |
@@ -3714,69 +4006,91 @@ const prevElement = node.previousElementSibling;
 | `nextElementSibling`     | 仅元素节点           | 现代浏览器（IE9+） | 直接获取下一个元素节点 |
 | `previousElementSibling` | 仅元素节点（上一个） | 现代浏览器（IE9+） | 获取前一个元素节点     |
 
+---
+
 ### -如何获得父节点、子节点
+
+---
 
 一、获取父节点的方法
 
 #### 1. **`parentNode` 属性**  
 
-返回当前元素的直接父节点，包括元素节点、文档节点等。若父节点不存在（如根元素），则返回 `null`。   **示例**：  
+返回当前元素的直接父节点，包括元素节点、文档节点等。若父节点不存在（如根元素），则返回 `null`。  
+**示例**：  
 
 ```javascript
 const child = document.getElementById('child');
 const parent = child.parentNode; // 返回最近的父元素或文档节点
 ```
 
-**特点**：   • 兼容性最好，支持所有浏览器。 • 若需要严格获取元素节点，需配合 `nodeType` 过滤。
+**特点**：  
+• 兼容性最好，支持所有浏览器。
+• 若需要严格获取元素节点，需配合 `nodeType` 过滤。
 
-1. **`parentElement` 属性**  
+2. **`parentElement` 属性**  
 
-返回当前元素的直接父元素节点（仅限 Element 类型），若父节点非元素则返回 `null`。   **示例**：  
+返回当前元素的直接父元素节点（仅限 Element 类型），若父节点非元素则返回 `null`。  
+**示例**：  
 
 ```javascript
 const parent = child.parentElement; // 仅返回元素类型父节点
 ```
 
-**适用场景**：   • 需要确保父节点为 HTML 元素时使用。
+**适用场景**：  
+• 需要确保父节点为 HTML 元素时使用。
+
+---
 
 二、获取子节点的方法
 
 #### 1. **`childNodes` 属性**  
 
-返回包含所有子节点的 NodeList（包括元素、文本、注释节点）。   **示例**：  
+返回包含所有子节点的 NodeList（包括元素、文本、注释节点）。  
+**示例**：  
 
 ```javascript
 const parent = document.getElementById('parent');
 const allChildren = parent.childNodes; // 包含文本节点（如换行符）
 ```
 
-**注意事项**：   • 需手动过滤非元素节点（如文本节点）。
+**注意事项**：  
+• 需手动过滤非元素节点（如文本节点）。
 
 #### 2. **`children` 属性**  
 
-返回仅包含元素子节点的 HTMLCollection。   **示例**：  
+返回仅包含元素子节点的 HTMLCollection。  
+**示例**：  
 
 ```javascript
 const elementChildren = parent.children; // 仅返回元素节点（如 div、span）
 ```
 
-**优势**：   • 自动跳过文本和注释节点，推荐常用。
+**优势**：  
+• 自动跳过文本和注释节点，推荐常用。
 
 #### 3. **`querySelectorAll()` 方法**  
 
-通过 CSS 选择器获取所有符合条件的子元素。   **示例**：  
+通过 CSS 选择器获取所有符合条件的子元素。  
+**示例**：  
 
 ```javascript
 const divChildren = parent.querySelectorAll('div'); // 返回所有子 div 元素
 ```
 
-**灵活性**：   • 支持复杂选择器（如 `.class`、`[attribute]`）。
+**灵活性**：  
+• 支持复杂选择器（如 `.class`、`[attribute]`）。
 
 #### 4. **首尾子节点获取**  
 
-• **`firstChild` / `lastChild`**：返回第一个/最后一个子节点（可能为文本节点）。 • **`firstElementChild` / `lastElementChild`**：返回第一个/最后一个元素子节点（跳过非元素节点）。
+• **`firstChild` / `lastChild`**：返回第一个/最后一个子节点（可能为文本节点）。
+• **`firstElementChild` / `lastElementChild`**：返回第一个/最后一个元素子节点（跳过非元素节点）。
+
+---
 
 
+
+---
 
 方法对比总结
 
@@ -3787,6 +4101,8 @@ const divChildren = parent.querySelectorAll('div'); // 返回所有子 div 元�
 |                      |                      |                    |              |
 | `children`           | 子元素集合           | 快速获取元素子节点 | IE9+         |
 | `querySelectorAll()` | 符合条件的所有子元素 | 精确选择特定元素   | 全浏览器支持 |
+
+---
 
 ### -对象值的访问
 
@@ -3807,7 +4123,10 @@ console.log(res.data.te.value)//wrong
 
 ### -Object.assign()
 
-**`Object.assign(attrParams, { ... })` 的作用** `Object.assign()` 是 JavaScript 的一个方法，用于 合并对象。它会将第二个参数（及后续参数）的所有 可枚举属性 复制到第一个参数（目标对象）上，并返回目标对象。
+**`Object.assign(attrParams, { ... })` 的作用**
+`Object.assign()` 是 JavaScript 的一个方法，用于 合并对象。它会将第二个参数（及后续参数）的所有 可枚举属性 复制到第一个参数（目标对象）上，并返回目标对象。
+
+---
 
 **在你的代码中的具体作用**
 
@@ -3827,6 +4146,8 @@ Object.assign(attrParams, {
 3. `categoryId` 更新为当前选中的三级分类ID（`categoryStore.c3Id`）。
 4. `categoryLevel` 固定为 3（表示三级分类）。
 
+---
+
 **为什么用 `Object.assign` 而不是直接赋值？**
 
 1. `attrParams` 是 `reactive` 对象（由 `reactive()` 创建），直接修改它的属性会触发 Vue 的响应式更新。
@@ -3843,23 +4164,31 @@ Object.assign(attrParams, {
    attrParams.categoryLevel = 3;
    ```
 
-**适用场景** • 表单重置：在打开编辑弹窗时清空表单数据。
+---
+
+**适用场景**
+• 表单重置：在打开编辑弹窗时清空表单数据。
 
 • 数据更新：确保对象的部分属性被覆盖，而其他属性保持不变。
 
 • 避免响应式丢失：对 `reactive` 或 `ref` 对象进行部分更新时。
 
+
+---
+
 **注意事项**
 
 1. 浅拷贝：`Object.assign` 只会复制对象的 第一层属性（如果属性值是对象，仍然是引用）。
 
-   ```
+   ```javascript
    const obj1 = { a: { b: 1 } };
    const obj2 = Object.assign({}, obj1);
    obj2.a.b = 2; // obj1.a.b 也会变成 2！
    ```
 
 2. 响应式对象：Vue 的 `reactive` 对象已经处理了响应式，所以 `Object.assign` 可以直接使用。
+
+---
 
 **总结**
 
@@ -3870,3 +4199,6 @@ Object.assign(attrParams, {
 | 逐个属性赋值                         | 可行，但代码冗余                            |
 
 ✅ 推荐使用 `Object.assign` 来安全地更新响应式对象！
+
+
+
