@@ -6,7 +6,7 @@ title:JavaScript
 
 
 
-## js
+# js
 
 ### 1.全局事件对象window
 

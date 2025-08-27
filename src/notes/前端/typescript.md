@@ -4,7 +4,7 @@ title:typescript
 
 
 
-## typescript
+# typescript
 
 ### ~不同类型之间的关系
 
