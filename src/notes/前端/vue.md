@@ -2640,3 +2640,105 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 
 
+
+
+
+### 使用v-on绑定数据
+
+
+
+```html
+<div :style="{ color: fcolor }"></div>
+```
+
+---
+
+**错误写法**
+
+```html
+<div :style="color: fcolor"></div>
+```
+
+`:style` 指令需要接收一个 JavaScript 对象，格式为：  
+
+```javascript
+{ css属性名: 变量值, ... }  在解析对象的时候只会解析value值，而不会解析key值
+```
+
+省略大括号会导致 Vue 将其解析为字符串而非对象，从而报错。
+
+**错误示例的解析结果**  
+你的代码会被解析为：
+
+```javascript
+:style="color: fcolor"
+// 等效于 v-bind:style="color: fcolor"
+```
+
+Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但这是一个非法表达式（未定义变量 `color`）。
+
+**多个样式属性**
+
+> [!Note]
+>
+> 对于不需要解析的一定要加上引号，例如‘px’，‘bold’，‘28px’
+
+```html
+<div :style="{ 'color': fcolor, fontSize: fontSize + 'px', 'font-weight': 'bold' }">
+  动态绑定多个样式
+</div>
+```
+
+<div :style="{ 
+             'width':'28px',
+             color: fcolor, 
+             fontSize: fontSize + 'px', 
+             'font-weight': 'bold',
+             'color': bgList[num] === '#000000' ?'#ffffff':'#333333',
+             'line-height': fontSize+10+'px'
+             }"
+     >
+  动态绑定多个样式
+</div>
+
+
+**CSS 属性名如果是 驼峰式 (fontSize)**
+
+
+
+```html
+<div :style="{ fontSize: fontSizeVar }"></div>
+```
+
+**如果包含连字符（如font-size），需用引号包裹：**
+
+```html
+<div :style="{ 'font-size': fontSizeVar }"></div>
+```
+
+**常见错误类型**
+
+1. **键名未加引号（特殊字符需引号）**  
+
+   ```html
+   ❌ :style="{ font-size: fontSize }" // 缺少引号的连字符属性名会报错
+   ✅ :style="{ 'font-size': fontSize }"
+   ```
+
+2. **变量未定义**  
+   如果 `fcolor` 未在 `data`/`computed`/`props` 中声明，控制台会报错：
+
+   ```
+   [Vue warn]: Property or method "fcolor" is not defined.
+   ```
+
+---
+
+**总结**
+
+• 必须用 `{ }` 包裹样式对象。
+• 键名若包含连字符（如 `font-size`），需加引号：`'font-size'`。
+• 确保绑定的变量（如 `fcolor`）是响应式的（定义在 `data` 或 `computed` 中）。
+
+### vue3中组件之间通信的方法
+
