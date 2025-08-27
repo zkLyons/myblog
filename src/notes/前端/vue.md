@@ -2656,7 +2656,7 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 **错误写法**
 
 ```html
-<div :style="color: fcolor"></div>
+//<div :style="color: fcolor"></div>
 ```
 
 `:style` 指令需要接收一个 JavaScript 对象，格式为：  
@@ -2721,7 +2721,7 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 1. **键名未加引号（特殊字符需引号）**  
 
    ```html
-   ❌ :style="{ font-size: fontSize }" // 缺少引号的连字符属性名会报错
+   ❌// :style="{ font-size: fontSize }" // 缺少引号的连字符属性名会报错
    ✅ :style="{ 'font-size': fontSize }"
    ```
 
