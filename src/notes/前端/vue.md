@@ -2750,3 +2750,1394 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 
 ### vue3中组件之间通信的方法
 
+#### 1 v-model
+
+父组件
+
+```
+<template>
+  <div>
+    <jch-input v-model="info"></jch-input>
+    <hr>
+    <h1>{{count}}----{{pageSize}}</h1>
+    <jch-button v-model:pageNo="count" v-model:pageSize="pageSize" @update:pageNo="handler01"></jch-button>
+  </div>
+</template>
+<script setup lang="ts">
+//v-model:一般应用于收集表单数据,实现数据双向绑定!!!
+//v-model:它可以实现组件之间通信,可以实现父子组件数据同步的!!!
+// 在vue3中，可以绑定多个v-model,但是在vue2中只能绑定一个v-model
+// v-model默认绑定的是modelValue,如果要绑定其他的属性，需要使用v-model:属性名
+// 在vue3中，在组件里使用v-model,一。默认会给子组件传递一个参数props：modelValue
+// 二。会给子组件绑定一个自定义事件@update:modelValue
+import { ref } from 'vue';
+//后续使用<JchInput>和<jch-input>都没有问题。
+import JchInput from './JchInput.vue';
+import JchButton from './JchButton.vue';
+const msg = ref('我爱你塞北的雪');
+const info = ref('菲律宾今天惹咱们!!!!')
+const count = ref(1);
+const pageSize  = ref(10);
+function handler01(num:number){
+  console.log(num,22)
+}
+</script>
+<style scoped></style>
+```
+
+子组件
+
+```
+<template>
+    <div>
+        <button @click="add">第三方UI按钮{{ pageNo }}</button>
+        <input type="text" :value="pageSize" @input="handler">
+    </div>
+</template>
+
+<script setup lang="ts">
+function add(){
+    $emits('update:pageNo',props.pageNo + 2)
+}
+function handler(event:any){
+    $emits('update:pageSize',event.target.value);
+}
+const props = defineProps(['pageNo','pageSize']);
+const $emits = defineEmits(['update:pageNo','update:pageSize'])
+</script>
+
+<style scoped></style>
+```
+
+
+
+> [!Note]
+>
+> 事件绑定
+
+| 用法                     | 是否正确 | 说明                                     |
+| ------------------------ | -------- | ---------------------------------------- |
+| `@event="fn"`            | ✅        | 绑定函数                                 |
+| `@event="fn($event)"`    | ✅        | 明确传递事件对象,一定要是event，不能简写 |
+| `@event="(e)=>fn($e)"`   | ✅        | 传入事件对象，可以简写                   |
+| `@event="() => fn(val)"` | ✅        | 显式传参                                 |
+| `@event="fn(val)"`       | ❌        | 会立即执行，**不是绑定**                 |
+
+#### 2.ref（父---》子）
+
+父组件
+
+```
+<SpuForm ref="spu" v-show="scence === 1" @changeScence="changeScence"></SpuForm>
+
+// spuForm的dom对象
+let spu = ref<InstanceType<typeof SpuForm>>()
+
+
+const updateSpu = (row: SpuData) => {
+    scence.value = 1
+    // 调用子组件实例方法获取完整的已有的spu数据
+	console.log(spu.value)
+	//在这里就可以访问到子组件的已经对外暴露的方法，并向其传递数据
+    spu.value.initHasSpu(row)
+}
+```
+
+子组件
+
+```
+const initHasSpu = (row:SpuData) => {
+
+}
+// 对外暴露方法
+defineExpose({ initHasSpu })
+```
+
+
+
+> [!NOTE]
+>
+> 接受组件实例对象，要是用ref，不建议使用reactive
+
+什么时候该用 `reactive`？
+
+适合场景：
+
+```ts
+// 1. 纯数据对象
+const user = reactive({ name: 'Alice', age: 30 });
+
+// 2. 嵌套数据
+const form = reactive({
+  fields: { username: '', password: '' }
+});
+```
+
+不适合场景：
+
+```ts
+// ❌ 组件实例
+const comp = reactive(componentInstance);
+
+// ❌ 基本类型
+const count = reactive(0); // 无效！
+```
+
+------
+
+六、终极记忆口诀
+
+> "**简单用 `ref`，对象用 `reactive`，组件实例必须 `ref`"
+
+1. 基本类型 → `ref`
+2. 普通对象 → 优先 `reactive`
+3. 组件/DOM → 必须 `ref`
+4. 不确定时 → 无脑 `ref`
+
+#### 3.自定义事件（子---》父）
+
+```
+//子组件 spuForm
+<el-button type="primary" @click="cancel">取消</el-button>
+
+
+//声明一个组件changeScence
+let $emits = defineEmits(['changeScence'])
+
+const cancel = () => {
+//触发事件changeScence
+$emits('changeScence', { flag: 0, params: 'update' })
+}
+
+```
+
+```
+//父组件
+//监听事件changeScence，一旦该事件被触发，立刻执行handler
+<skuForm @changeScence="handler"></skuForm>
+
+
+const scence=ref<number>(0)
+const handler=(obj:any)=>{
+	scence.value=obj.flag
+}
+```
+
+
+
+
+
+
+
+
+
+### --nextTick()
+
+`nextTick()` 是 Vue.js 提供的一个核心方法，用于在 DOM 更新周期后 执行延迟回调。它的核心作用是解决数据变化后立即操作 DOM 可能导致的时机问题。以下是详细使用指南：
+
+---
+
+一、核心作用
+当 Vue 响应式数据变化时，DOM 更新是 异步的。直接操作 DOM 可能获取的是更新前的状态。`nextTick()` 会等待 Vue 完成 DOM 更新后再触发回调，确保操作基于最新 DOM。
+
+---
+
+二、使用场景
+
+1. **操作更新后的 DOM**
+
+```javascript
+this.message = '更新后的文本'; // 修改数据
+this.$nextTick(() => {
+  // 这里能获取到更新后的 DOM
+  const el = document.getElementById('text');
+  console.log(el.textContent); // 输出：'更新后的文本'
+});
+```
+
+2. **获取动态渲染的组件**
+
+```javascript
+this.showComponent = true; // 条件渲染组件
+this.$nextTick(() => {
+  // 确保子组件已渲染
+  this.$refs.childComponent.doSomething();
+});
+```
+
+3. **解决第三方库的初始化时机问题**
+
+```javascript
+this.loadData().then(() => {
+  this.$nextTick(() => {
+    // 确保数据渲染后再初始化图表
+    this.initChart(); 
+  });
+});
+```
+
+
+
+---
+
+与 `setTimeout` 的区别
+
+|          | `nextTick()`           | `setTimeout(fn, 0)`    |
+| -------- | ---------------------- | ---------------------- |
+| 执行时机 | Vue DOM 更新后立即执行 | 浏览器事件循环的下一轮 |
+| 优先级   | 微任务（microtask）    | 宏任务（macrotask）    |
+| 可靠性   | 确保 DOM 已更新        | 可能早于 DOM 更新      |
+| 适用框架 | Vue 专用               | 通用但需手动控制时机   |
+
+---
+
+五、底层原理
+
+1. Vue 将数据变更后的 DOM 更新任务放入异步队列。
+
+2. `nextTick()` 将回调追加到该队列末尾。
+
+3. 当前同步代码执行完毕后，Vue 依次执行：
+   • 数据更新的 DOM 渲染
+
+   • `nextTick()` 回调
+
+
+---
+
+六、注意事项
+
+1. 避免滥用：非必要不使用，大多数情况下 Vue 的响应式系统会自动处理。
+
+2. 组件销毁处理：
+
+   ```javascript
+   this.$nextTick(() => {
+     if (!this._isDestroyed) { // 检查组件是否已销毁
+       // 安全操作
+     }
+   });
+   ```
+
+3. Vue 3 变化：  
+   在 Vue 3 中，`nextTick` 通过 `import { nextTick } from 'vue'` 引入，但用法相同。
+
+---
+
+七、经典问题示例
+问题：修改数据后立即获取 DOM 高度失败
+
+```javascript
+this.showList = true; // 控制列表显示
+// 直接获取会导致高度计算错误
+const height = document.querySelector('.list').offsetHeight; 
+```
+
+解决：
+
+```javascript
+this.showList = true;
+this.$nextTick(() => {
+  // 正确获取到渲染后的高度
+  const height = document.querySelector('.list').offsetHeight;
+});
+```
+
+---
+
+总结
+• 何时用：需要在数据变化后操作 DOM 或依赖 DOM 的库时。
+
+• 核心价值：保证代码在正确的 DOM 更新周期后执行。
+
+• 替代方案：在组合式 API 中，`watch` + `flush: 'post'` 也能实现类似效果（Vue 3）。
+
+
+
+
+
+
+
+
+
+简单示例：点击按钮后获取更新后的 DOM 内容
+
+场景说明
+
+1. 点击按钮修改数据
+2. 立即尝试读取 DOM 中的文本内容
+3. 没有用 `nextTick` 时会获取旧值
+4. 使用 `nextTick` 后能正确获取新值
+
+---
+
+代码对比（Vue 2/3 通用写法）
+
+```html
+<template>
+  <div>
+    <p id="message">{{ message }}</p>
+    <button @click="changeMessage">修改内容</button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      message: "初始文本"
+    }
+  },
+  methods: {
+    changeMessage() {
+      // 1. 修改数据
+      this.message = "更新后的文本";
+      
+      // 2. 直接读取 DOM（会获取旧值）
+      console.log("直接读取:", document.getElementById('message').textContent); 
+      // 输出：'初始文本'（错误！）
+      
+      // 3. 使用 nextTick 读取（正确获取新值）
+      this.$nextTick(() => {
+        console.log("nextTick读取:", document.getElementById('message').textContent);
+        // 输出：'更新后的文本'（正确！）
+      });
+    }
+  }
+}
+</script>
+```
+
+---
+
+执行结果
+
+1. 点击按钮后控制台会先后输出：
+
+   ```
+   直接读取: 初始文本
+   nextTick读取: 更新后的文本
+   ```
+
+2. 直观体现了 `nextTick` 的延迟回调特性
+
+---
+
+关键点解释
+• 为什么直接读取是旧值？  
+
+  Vue 的数据变化到 DOM 更新是异步的，同步代码执行时 DOM 还未更新。
+
+• 为什么 nextTick 能拿到新值？  
+
+  它的回调会被压入微任务队列，在 DOM 更新后执行。
+
+---
+
+类比理解
+
+| 操作                | 类比                     |
+| ------------------- | ------------------------ |
+| 直接读取 DOM        | 快递刚发货就查物流       |
+| `nextTick()` 后读取 | 等快递显示"已签收"再查看 |
+
+这个例子清晰展示了 `nextTick` 如何解决 DOM 更新的异步延迟问题。
+
+### --ref在动态引入dom中的多种用法
+
+#### 动态用法
+
+在 Vue 3 中，使用 `ref` 动态引用 DOM 元素是一种常见操作，尤其在需要直接操作 DOM 的场景（如焦点控制、动画触发、第三方库集成）中非常有用。以下是动态引用 DOM 元素的详细用法说明：
+
+---
+
+一、基本用法：引用单个 DOM 元素
+
+1. **在模板中绑定 `ref`**
+
+  通过 `ref` 属性将 DOM 元素绑定到一个响应式引用变量：
+
+```vue
+<template>
+  <input :ref="inputRef" type="text" />
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+// 1. 声明一个 ref 变量，初始值为 null
+const inputRef = ref<HTMLInputElement | null>(null);
+
+// 2. 在生命周期钩子中访问 DOM
+onMounted(() => {
+  if (inputRef.value) {
+    inputRef.value.focus(); // 页面加载后自动聚焦到输入框
+  }
+});
+</script>
+```
+
+2. **关键点**
+   • 类型定义：在 TypeScript 中，需明确指定 `ref` 的类型（如 `HTMLInputElement`），初始值设为 `null`。
+
+• 安全访问：访问 `inputRef.value` 前需检查是否为 `null`，避免未渲染时的错误。
+
+
+---
+
+二、动态引用多个 DOM 元素（循环场景）
+
+当需要引用通过 `v-for` 动态生成的多个元素时，需使用 函数或动态键名 绑定 `ref`。
+
+1. **使用函数绑定动态 `ref`**
+
+```vue
+<template>
+  <ul>
+    <li 
+      v-for="(item, index) in items" 
+      :key="item.id"
+      :ref="(el) => setItemRef(el, index)"
+    >{{ item.text }}</li>
+  </ul>
+</template>
+//注意：ref并没有像事件处理那样可以通过(el) => setItemRef( index)来传递el事件，只能通过(el) => setItemRef(el, index)来传递dom事件el
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const items = ref([
+  { id: 1, text: 'Item 1' },
+  { id: 2, text: 'Item 2' }
+]);
+
+// 1. 声明一个 ref 数组存储所有 DOM 引用
+const itemRefs = ref<HTMLElement[]>([]);
+
+// 2. 在 ref 绑定时收集 DOM 元素
+const setItemRef = (el: HTMLElement | null, index: number) => {
+  if (el) {
+    itemRefs.value[index] = el;
+  }
+};
+
+// 3. 操作 DOM 元素
+onMounted(() => {
+  console.log(itemRefs.value); // 输出所有 li 元素的 DOM 对象
+});
+</script>
+```
+
+2. **使用动态键名绑定 `ref`**
+
+```vue
+<template>
+  <div 
+    v-for="(item, index) in items" 
+    :key="item.id"
+  >
+    <input :ref="`input-${index}`" type="text" />
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const items = ref([{ id: 1 }, { id: 2 }]);
+
+// 通过动态键名访问 ref
+onMounted(() => {
+  console.log(refs.value['input-0']); // 第一个输入框的 DOM 元素
+});
+</script>
+```
+
+---
+
+三、处理条件渲染的 DOM 元素
+
+当元素被 `v-if` 或异步数据控制渲染时，需确保在 DOM 渲染完成后访问 `ref`。
+
+1. **使用 `nextTick` 确保 DOM 更新**
+
+```vue
+<template>
+  <input v-if="showInput" :ref="inputRef" type="text" />
+  <button @click="showInput = true">显示输入框</button>
+</template>
+
+<script setup>
+import { ref, nextTick } from 'vue';
+
+const showInput = ref(false);
+const inputRef = ref<HTMLInputElement | null>(null);
+
+const handleClick = async () => {
+  showInput.value = true;
+  // 等待 DOM 更新完成
+  await nextTick();
+  inputRef.value?.focus();
+};
+</script>
+```
+
+---
+
+四、结合第三方库使用 `ref`
+
+1. **集成图表库（如 ECharts）**
+
+```vue
+<template>
+  <div :ref="chartRef" style="width: 600px; height: 400px;"></div>
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import * as echarts from 'echarts';
+
+const chartRef = ref<HTMLElement | null>(null);
+let chartInstance: echarts.ECharts | null = null;
+
+onMounted(() => {
+  if (chartRef.value) {
+    chartInstance = echarts.init(chartRef.value);
+    chartInstance.setOption({ /* 图表配置 */ });
+  }
+});
+
+onBeforeUnmount(() => {
+  chartInstance?.dispose(); // 销毁图表实例
+});
+</script>
+```
+
+---
+
+五、动态引用组件的 DOM 元素
+
+1. **引用子组件的根元素**
+
+```vue
+<!-- 父组件 -->
+<template>
+  <ChildComponent :ref="childRef" />
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import ChildComponent from './ChildComponent.vue';
+
+const childRef = ref<InstanceType<typeof ChildComponent> | null>(null);
+
+onMounted(() => {
+  // 访问子组件的 DOM 元素
+  console.log(childRef.value?.$el); 
+});
+</script>
+```
+
+---
+
+七、总结
+
+| 场景             | 写法                                                         | 注意事项                     |
+| ---------------- | ------------------------------------------------------------ | ---------------------------- |
+| 单个元素引用     | `<div :ref="domRef"></div>` + `const domRef = ref<Type>()`   | 类型需匹配 DOM 元素类型      |
+| 循环动态引用     | `:ref="(el) => setRef(el, index)"` + `ref` 数组              | 避免直接修改数组，用函数收集 |
+| 条件渲染元素引用 | `nextTick()` 等待渲染完成                                    | 确保 DOM 已存在              |
+| 第三方库集成     | 在 `onMounted` 中初始化，`onBeforeUnmount` 清理资源          | 防止内存泄漏                 |
+| 组件引用         | `<Child :ref="childRef" />` + `InstanceType<typeof Child>` 类型标注 | 通过 `$el` 访问根元素        |
+
+通过合理使用动态 `ref`，可以灵活操作 DOM 元素，实现复杂的交互需求。
+
+#### 静态用法
+
+在 Vue 3 中，静态 `ref` 之所以能获取到 DOM 或组件实例，是因为 `<script setup>` 语法提供了一种隐式的自动绑定机制，而 `:ref`（动态绑定）需要开发者手动处理绑定逻辑。以下是详细解释：
+
+------
+
+**核心原因：`<script setup>` 的隐式约定**
+ 当你在模板中使用 `ref="变量名"`（静态`ref`）时，Vue 3 的编译器会自动执行以下操作：
+
+1. 隐式绑定：将静态 `ref` 的值（如 `"spu"`）与 `<script setup>` 中声明的同名变量（如 `const spu = ref()`）自动关联。
+2. 类型推断：自动将 DOM 元素或组件实例赋值给 `spu.value`，无需开发者手动操作。
+
+```
+<template>
+  <!-- 静态 ref="spu"，自动绑定到同名变量 `spu` -->
+  <SpuForm ref="spu"></SpuForm>
+</template>
+<script setup>
+const spu = ref(); // spu.value 将被赋值为 SpuForm 的实例
+</script>
+```
+
+------
+
+**为什么动态 `:ref="spu"` 会失效？**
+ 当你改为动态绑定（`:ref="spu"`）时：
+
+1. 作用逻辑改变：`:ref` 会尝试将 `spu` 变量本身作为绑定目标，但由于 `spu` 是响应式变量，实际逻辑等价于 `:ref="(el) => { spu.value = el }"`。
+2. 组件渲染时机问题：如果 `SpuForm` 组件尚未渲染（如被 `v-show="false"` 隐藏），此时 `spu.value` 会保持初始值 `undefined`，无法获取组件实例。
+
+因此，动态 `:ref` 需要开发者更严谨地控制变量赋值时机，而静态 `ref` 的隐式绑定机制已经帮你处理了这一逻辑。
+
+------
+
+**静态 `ref` 的优势和限制**
+
+| 特性       | 静态 `ref="xxx"`               | 动态 `:ref="xxx"`                |
+| ---------- | ------------------------------ | -------------------------------- |
+| 绑定机制   | 自动绑定同名响应式变量         | 需手动处理（如用函数赋值）       |
+| 初始化时机 | 组件挂载时自动赋值             | 需确保组件已渲染                 |
+| 代码简洁性 | 更简洁，无需额外逻辑           | 需处理边界条件（如 `v-if` 场景） |
+| 适合场景   | 简单场景，直接获取子组件或 DOM | 动态场景（如循环、条件渲染）     |
+
+------
+
+**用户代码中 `spu` 为何正确绑定？**
+ 在你的代码中：
+
+```
+<SpuForm ref="spu" v-show="scence === 1"></SpuForm>
+```
+
+```
+const spu = ref<InstanceType<typeof SpuForm>>();
+```
+
+即使 `v-show="scence === 1"` 初始为 `false`，以下逻辑也会成立：
+
+1. 首次渲染时：`scence === 1` 为 `false`，`SpuForm` 被 `v-show` 隐藏（但仍存在于 DOM 中）。
+2. 组件实例已创建：`v-show` 不会移除 DOM，只是修改 `display: none`，所以静态 `ref` 会在组件初始化时立即赋值。
+3. 访问时机正确：当点击按钮切换 `scence` 为 `1` 时，`spu.value` 已被正确赋值。
+
+如果换成 `v-if`，组件会在 `scence === 1` 时动态创建，此时静态 `ref` 的隐式绑定仍然有效，但需确保在组件渲染后访问 `spu.value`（如在 `nextTick` 或事件回调中）。
+
+为何会失效：
+
+```
+<SpuForm :ref="spu" v-show="scence === 1"></SpuForm>
+```
+
+**1. 动态 `:ref` 的绑定逻辑**
+
+当你使用 `:ref="spu"` 时，Vue 会尝试将组件实例赋值给 `spu.value`。
+具体来说，这等价于：
+
+html
+
+运行
+
+复制
+
+```
+<SpuForm :ref="(el) => { spu.value = el }" v-show="scence === 1"></SpuForm>
+```
+
+- **绑定触发时机**：只有当组件**首次挂载**或**重新渲染**时，Vue 才会执行 `:ref` 的回调函数。
+- **初始隐藏的陷阱**：如果 `scence` 初始值为 `0`（即 `v-show="false"`），组件虽然存在于 DOM 中，但可能由于 **Vue 的异步渲染队列**，`ref` 的回调函数不会立即执行。
+
+------
+
+**2. 响应式更新的异步性**
+
+Vue 的响应式更新是**批量处理**且**异步执行**的。
+当组件初次渲染时：
+
+1. **模板编译**：Vue 发现 `<SpuForm>` 组件需要渲染（即使被 `v-show` 隐藏）。
+2. **创建组件实例**：`SpuForm` 的实例被创建，但尚未挂载到 DOM。
+3. **触发 `:ref` 回调**：理论上，此时应执行 `(el) => { spu.value = el }` 并将实例赋值给 `spu.value`。
+4. **异步延迟问题**：由于 Vue 的更新机制，`ref` 的回调可能被推迟到下一个事件循环中执行，导致在 `onMounted` 生命周期中访问 `spu.value` 时，值仍为 `undefined`。
+
+------
+
+**3. `v-show` 的隐藏状态对绑定的影响**
+
+- **组件已挂载但不可见**：`v-show` 仅切换 CSS 的 `display` 属性，不销毁组件，因此 `SpuForm` 的实例在初始化时已被创建。
+- **静态 `ref` 的同步性**：静态 `ref="spu"` 在组件实例化时**同步**绑定到变量 `spu.value`，因此无论组件是否可见，`spu.value` 都会被立即赋值。
+- **动态 `:ref` 的异步性**：动态 `:ref` 的回调函数可能因 Vue 的异步更新机制而延迟执行，导致在 `onMounted` 中访问 `spu.value` 时，值尚未被赋值。
+
+------
+
+#### **静态ref还是动态ref？**
+
+ 选择静态 `ref` 的场景：
+
+1. 直接通过变量名绑定：无需动态生成 `ref` 名称。
+2. 简单组件/DOM 引用：不需要在循环或条件逻辑中动态绑定。
+3. 追求代码简洁性：利用 Vue 3 的隐式绑定机制减少样板代码。
+
+选择动态 `:ref` 的场景：
+
+1. 动态生成 `ref` 名称：如 `v-for="item in list" :ref="'item-' + item.id"`。
+2. 函数式赋值：如 `:ref="(el) => { myRefs.push(el) }"`。
+
+在你的具体案例中，静态 `ref="spu"` 是更简洁可靠的选择，契合 Vue 3 `<script setup>` 的设计哲学。
+
+
+
+### 路由
+
+##### useRouter和useRoute
+
+想要实现了路由跳转，需要引入安装vue-router
+
+```
+npm i vue-router
+```
+
+vue-router包含着两个重要的函数`useRoute`和`useRouter`
+
+```
+import {useRouter,useRoute} from 'vue-router'
+let $router =useRouter()
+let $route =useRoute()
+```
+
+
+
+他们的区别是：
+
+- **`useRouter()`** 用于**获取路由器实例**。你可以用它来**控制路由跳转**、修改路由历史记录、添加路由守卫等。它返回的是一个全局的路由器对象。
+
+就像是一辆车，可以带你去一些地方，查看可以走的路线。
+
+1.路由跳转
+
+```
+$router.push('.home')
+$router.push({ name: 'User', params: { id: 123 } });
+```
+
+2.前进、后退
+
+```
+// 返回上一页
+$router.go(-1);
+// 前进一页
+$router.go(1);
+```
+
+3.访问全局配置
+
+```
+// 获取所有路由记录
+console.log($router.getRoutes());
+```
+
+
+
+- **`useRoute()`** 用于**获取当前路由对象**。这个对象包含了关于当前路由的全部信息，例如**路径**（`path`）、**参数**（`params`）、**查询参数**（`query`）、**名称**（`name`）和 **元数据**（`meta`）等。它是一个只
+
+  读的响应式对象，当路由变化时，它会同步更新。
+
+  把它想象成你的**GPS信息**，只告诉你**你现在在哪里**，以及你**是如何到达**的。它不会带你走，只提供信息。
+
+1.获取当前路径
+
+```
+// 比如当前 URL 是 /product/123?category=shoes
+console.log($route.path); // '/product/123'
+```
+
+2.获取路由参数
+
+```
+console.log($route.params.id); // '123'
+```
+
+3.获取路由元数据:
+
+```
+// 访问路由配置中的 meta 字段
+console.log($route.meta.title);
+```
+
+4.监听路由变化
+
+```
+import { useRoute } from 'vue-router';
+import { watch } from 'vue';
+
+const route = useRoute();
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    console.log(`路由从 ${oldPath} 切换到 ${newPath}`);
+  }
+);
+```
+
+##### useRouter|useRoute的外部、内部引入
+
+> 注意：`useRouter()` 和 `useRoute()` 这两个 Vue Router 的 Composition API 函数 **只能在 Vue 组件的 `setup()` 函数或其生命周期钩子中调用**。它们依赖于 Vue 组件的上下文来找到当前的路由器实
+>
+> 例。所以在pinia中是不能够直接使用这两个api函数的。
+
+在vue组件外部（如pinia中）该如何引入呢？
+
+在 Vue 3 项目中，路由器（router）的引入方式取决于你是在**组件内部**还是**组件外部**（比如 Pinia Store 或 JavaScript 文件）使用它。
+
+------
+
+
+
+1. 在 Vue 组件中引入
+
+
+
+在 Vue 组件中，你应该使用 Composition API 提供的 Hook 函数来引入路由器。
+
+- **`useRouter()`**：用于获取路由器实例，可以进行**导航操作**（如 `router.push()`）。
+- **`useRoute()`**：用于获取当前路由对象，可以访问**当前路由信息**（如 `route.params`）。
+
+**示例代码：**
+
+HTML
+
+```
+<template>
+  <button @click="goToHomePage">前往首页</button>
+  <p>当前路径: {{ currentPath }}</p>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+
+// 获取路由器实例
+const router = useRouter();
+// 获取当前路由对象
+const route = useRoute();
+
+// 一个导航方法
+const goToHomePage = () => {
+  router.push('/');
+};
+
+// 访问当前路由路径
+const currentPath = computed(() => route.path);
+</script>
+```
+
+------
+
+
+
+2. 在 Vue 组件外部引入
+
+- 引入router
+
+
+
+在 Vue 组件外部，例如在**Pinia Store**、**全局路由守卫**文件（如 `permission.ts`）或普通的 `.js` / `.ts` 文件中，你不能使用 `useRouter()` 或 `useRoute()`。
+
+在这种情况下，你需要直接**从路由器实例的创建文件**中导入它。通常，这个文件是 `router/index.ts`。
+
+**示例代码：**
+
+假设你的项目结构如下：
+
+```
+src/
+├── router/
+│   └── index.ts  // 路由器实例在这里创建并导出
+└── store/
+    └── user.ts   // Pinia Store 文件
+```
+
+在 `src/router/index.ts` 文件中，你会看到类似这样的代码：
+
+JavaScript
+
+```
+import { createRouter, createWebHistory } from 'vue-router';
+// ... 定义你的路由数组
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [/* ... */],
+});
+// 导出路由器实例
+export default router;
+```
+
+然后，在你的 `src/store/user.ts` 文件中，你可以直接导入这个导出的路由器实例：
+
+JavaScript
+
+```
+// src/store/user.ts
+import { defineStore } from 'pinia';
+import router from '@/router'; // 从 router/index.ts 直接导入路由器实例
+
+const useUserStore = defineStore('user', {
+  actions: {
+    // 动态添加路由的 action
+    addAsyncRoutes() {
+      // 假设这些是需要添加的路由
+      const newRoutes = [
+        { path: '/profile', component: () => import('@/views/Profile.vue') }
+      ];
+      
+      newRoutes.forEach(route => {
+        router.addRoute(route); // 直接使用导入的 router 实例
+      });
+    },
+  },
+});
+```
+
+- 引入route
+
+通过vue组件实例将参数route传入到pinia
+
+```
+<script setup>
+import { useRoute } from 'vue-router';
+import useProductStore from '@/store/modules/product';
+import { onMounted } from 'vue';
+
+const route = useRoute();
+const productStore = useProductStore();
+
+onMounted(() => {
+  // 在组件挂载时，将 route 对象作为参数传递给 Store 的 action
+  productStore.fetchProductDetails(route);
+});
+</script>
+```
+
+
+
+
+
+```
+// src/store/modules/product.ts
+import { defineStore } from 'pinia';
+import { RouteLocationNormalizedLoaded } from 'vue-router'; // 引入路由类型
+
+const useProductStore = defineStore('product', {
+  state: () => ({
+    productId: null,
+    productDetails: null,
+  }),
+  actions: {
+    // 接受路由对象作为参数
+    async fetchProductDetails(route: RouteLocationNormalizedLoaded) {
+      // 从路由参数中获取 id
+      const productId = route.params.id;
+      if (productId) {
+        this.productId = productId;
+        // 假设这里调用 API 获取产品详情
+        this.productDetails = await fetchProductApi(productId);
+      }
+    },
+  },
+});
+
+export default useProductStore;
+```
+
+
+
+总而言之，记住这个简单的规则：
+
+- **在组件内部**使用 **`useRouter`** 和 **`useRoute`**。
+- **在组件外部**（如 Pinia Store）直接 **`import router from '@/router'`**。
+
+------
+
+
+
+
+
+##### createRouter()和useRouter()的区别
+
+`createRouter()` 和 `useRouter()` 创建的 `router` 是**同一个路由器实例**，但它们的作用和使用场景完全不同。
+
+简单来说：
+
+- **`createRouter()`** 是**路由器实例的创建者**。它只在你的应用程序的**入口文件**（通常是 `main.js` 或 `main.ts`）中被调用一次。
+- **`useRouter()`** 是一个**路由器实例的访问者**。它允许你在**组件内部**访问这个已经创建好的、全局唯一的路由器实例。
+
+------
+
+
+
+- `createRouter()` 的作用
+
+
+
+`createRouter()` 是 Vue Router 库的核心函数，用于**创建**一个新的路由器实例。它需要配置应用的路由规则（`routes`）和历史模式（`history`），然后返回一个完整的、可供整个应用使用的路由器对象。
+
+使用场景：
+
+仅在应用程序的初始化阶段使用，例如在 main.ts 文件中：
+
+JavaScript
+
+```
+// main.ts
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import App from './App.vue'
+
+// 1. 使用 createRouter() 创建路由器实例
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: () => import('./views/Home.vue') },
+    // ...更多路由
+  ],
+})
+
+const app = createApp(App)
+// 2. 将路由器实例挂载到 Vue 应用上
+app.use(router)
+
+app.mount('#app')
+```
+
+这个 `router` 对象是全局唯一的，管理着整个应用的导航状态。
+
+------
+
+
+
+- `useRouter()` 的作用
+
+
+
+`useRouter()` 是 Vue 3 的 Composition API 提供的一个 Hook 函数。它让你可以**在组件的 `setup()` 函数中**获取到由 `createRouter()` 创建的那个**唯一的路由器实例**。
+
+使用场景：
+
+在任何需要进行路由操作的组件内部使用。
+
+```
+<template>
+  <button @click="goToAboutPage">前往关于我们</button>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+// 1. 在组件内部通过 useRouter() 获取路由器实例
+const router = useRouter()
+
+const goToAboutPage = () => {
+  // 2. 使用这个实例进行编程式导航
+  router.push('/about')
+}
+</script>
+```
+
+
+
+##### 总结区别
+
+用一个例子来比喻概括它们之间的关系：
+
+- **`createRouter`** 就像**建造房子**。它一次性地把房子的所有结构（路由规则、历史模式）都建好，这个房子（路由器实例）是整个应用唯一的。
+- **`useRouter`** 就像**一把钥匙**。它不是用来造房子的，而是让你在房子的某个房间里（组件内部），能够轻松地拿到这把钥匙，然后自由地在房子里走动（进行路由跳转、访问路由实例）。
+
+
+
+| 特性         | `createRouter()`                             | `useRouter()`                       |
+| ------------ | -------------------------------------------- | ----------------------------------- |
+| **功能**     | **创建**一个路由器实例                       | **访问**一个已存在的路由器实例      |
+| **返回值**   | 一个完整的、可配置的路由器对象               | 一个用于操作路由的路由器对象        |
+| **调用位置** | 仅在**应用程序入口**（`main.js/ts`）调用一次 | 在**任何组件**的 `setup` 钩子中调用 |
+| **作用**     | 定义应用的路由规则和行为                     | 执行路由跳转、导航守卫等操作        |
+
+你遇到的问题通常是尝试在组件外部（如 Pinia Store）使用 `useRouter()`，这会导致报错，因为 `useRouter()` 依赖于
+
+组件的上下文。在这种情况下，你应该直接导入由 `createRouter()` 创建的那个 `router` 实例。
+
+
+
+### 插槽
+
+插槽（Slot）是 Vue.js 等前端框架中一种非常重要的机制，它的主要作用是**内容分发**和**增强组件的复用性与灵活性**。
+
+想象一下你正在使用一个组件，比如一个 `<button>` 组件。你可能希望按钮的样式是固定的，但按钮内部的文本（比如“提交”、“取消”、“保存”）是动态变化的。如果每次都通过 `props` 来传递文本，会很麻烦。
+
+插槽的作用就像一个占位符，它允许你在**组件标签内部**定义内容，然后这个内容会被组件渲染到预定的位置。
+
+##### 核心作用
+
+
+
+1. **内容分发**： 这是插槽最基本的功能。它允许父组件将内容（文本、HTML、甚至其他组件）“塞进”子组件内部的指定位置。
+
+   - **例子**： 一个 `<MyComponent>` 组件可能有一个内部结构：
+
+     HTML
+
+     ```
+     <div class="container">
+       <header>这是一个头部</header>
+       <main>
+         <slot></slot>
+       </main>
+       <footer>这是一个尾部</footer>
+     </div>
+     ```
+
+     当你在父组件中使用它时，可以在 `<MyComponent>` 标签内部放入任何内容，这些内容会自动填充到 `<slot>` 标签的位置：
+
+     HTML
+
+     ```
+     <MyComponent>
+       <h1>这里是主内容</h1>
+       <p>这是通过插槽插入的段落。</p>
+     </MyComponent>
+     ```
+
+2. **组件复用与定制化**： 插槽让你可以创建通用的、可复用的组件，同时允许每个实例有自己独特的内容。
+
+   - **例子**： 一个 `<Card>` 组件可以有固定的样式（边框、阴影），但你可以用插槽来定义卡片内部的内容，比如标题、图片、正文等。
+
+     HTML
+
+     ```
+     <Card>
+       <template #header>
+         <h2>我的卡片标题</h2>
+       </template>
+       <template #body>
+         <img src="..." />
+         <p>卡片的正文内容。</p>
+       </template>
+     </Card>
+     ```
+
+     通过这种方式，你可以在不改变 `<Card>` 组件内部代码的情况下，创建多种不同内容和布局的卡片。
+
+3. **作用域插槽（Scoped Slots）**： 这是插槽的高级用法，也是你之前代码中用到的。它允许子组件将自己的**内部数据**（如你代码中的 `row`）暴露给父组件，供父组件的插槽内容使用。
+
+   - **例子**： `el-table` 组件的 `<el-table-column>` 就是一个典型的作用域插槽。它知道每一行的数据（`row`），但它不知道你想要如何显示这些数据。通过作用域插槽，它把 `row` 数据传递给你，然
+
+     后你可以在 `<template>` 中定义如何使用它（例如，用 `<img>` 标签来显示 `row.logoUrl`）。
+
+
+
+【实例1：默认插槽和具名插槽】
+
+```vue
+card组件：card.vue文件
+
+<template>
+  <header>
+    <!-- 具名插槽，命名为header -->
+    <slot name="header"></slot>
+  </header>
+  <tail>
+    <slot name="tail"></slot>
+  </tail>
+  <div class="default1">
+    <slot></slot>
+  </div>
+  <div class="default2">
+    <slot></slot>
+  </div>
+  <div class="default3">
+    <slot></slot>
+  </div>
+  <!-- 这里不给slot起名字和起名为default是一样的，都代表默认插槽 -->
+  <div class="default4">
+    <slot name="default"></slot>
+  </div>
+</template>
+
+<script setup lang="ts"></script>
+
+<style scoped></style>
+
+```
+
+
+
+```vue
+调用实例：index.vue文件
+
+
+<template>
+  <card>
+    <!-- 具名插槽，v-slot等同于#，后者是简写形式 -->
+    <template v-slot:tail>
+      <h3 style="color: blue">这是尾部</h3>
+    </template>
+    <template #header>
+      <h3 style="color: red">这是头部</h3>
+    </template>
+    <!-- <template #header></template>不可重复使用同一个插槽 -->
+    <!-- 必须加上#default才能识别到默认插槽-->
+    <!-- 如果出现多个默认插槽，那么就填充所有的默认插槽 -->
+    <template #default>
+      <h1>这是默认插槽</h1>
+    </template>
+    <!-- 默认插槽也可不不使用template来包裹，其等同于上面的#default默认插槽 -->
+    <!-- 如果加上这句话，就会报错，因为默认插槽重复了，不可重复使用一个插槽 -->
+    <!-- <h1>这是默认插槽</h1> -->
+  </card>
+
+  <div>
+    <h1>404界面</h1>
+  </div>
+</template>
+
+<script setup lang="ts">
+import Card from './card.vue'
+</script>
+
+<style scoped lang="scss"></style>
+
+```
+
+![image-20250826202850000](./assets/image-20250826202850000-1756293276717-1.png)
+
+【实例2：作用域插槽】
+
+//子组件Child.vue
+
+```vue
+<template>
+  <div>
+    <slot :msg1="msg"  :$row="row"></slot>
+    <header>
+      <slot name="header" :permissionArr></slot>
+    </header>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
+const msg = ref('来自子组件的msg数据')
+const permissionArr = reactive({
+  name: 'zs',
+  age: 18,
+})
+const row = ref(123)
+</script>
+
+<style scoped></style>
+
+```
+
+//父组件调用
+
+```
+<template>
+//默认插槽，不写template也可以
+  <Child #="{ $row, msg1 }">{{ $row }}+{{ msg1 }}</Child>
+  <Child>
+    <template #header="{ permissionArr }">
+      {{ permissionArr.name }}--{{ permissionArr.age }}
+    </template>
+  </Child>
+</template>
+
+<script setup lang="ts">
+import Child from './child.vue'
+</script>
+
+<style scoped></style>
+
+
+```
+
+【实例3：作用域插槽-table实现】
+
+//子组件
+
+```vue
+<!-- MyTable.vue -->
+<template>
+  <table class="my-table">
+    <thead>
+      <tr>
+        <th v-for="headText in headTexts" :key="headText.prop">
+          {{ headText.label }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(row, rowIndex) in data" :key="rowIndex">
+        <td v-for="headText in headTexts" :key="headText.prop">
+          <slot
+            :name="headText.prop"
+            :$row="row"
+            :$index="rowIndex"
+            :headText="headText"
+          >
+            <!-- 插槽后备内容，如果父组件没有提供插槽内容，就会默认显示该内容 -->
+            <!-- {{ row[column.prop] }} -->
+          </slot>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<script setup>
+defineProps(['data', 'headTexts'])
+</script>
+<style scoped>
+.my-table {
+  border: 1px solid black;
+  /* 合并边框 */
+  border-collapse: collapse;
+}
+.my-table th,
+.my-table td {
+  border: 1px solid red;
+  padding: 4px;
+}
+</style>
+
+```
+
+//父组件
+
+```vue
+<!-- 使用MyTable -->
+<template>
+  <MyTable :data="users" :headTexts="headTexts">
+    <!-- 自定义name列 -->
+    <template #name="{ $row, $index }">
+      <strong>{{ $row.name }}</strong>
+      <small>(行号: {{ $index + 1 }})</small>
+    </template>
+
+    <!-- 自定义操作列 -->
+    <template #actions="{ $row }">
+      <button @click="edit($row)">编辑</button>
+      <button @click="delete $row.id">删除</button>
+    </template>
+    <!-- 自定义邮箱列 -->
+    <template #email="{ $row }">
+      <strong>{{ $row.email }}</strong>
+    </template>
+  </MyTable>
+</template>
+
+<script setup>
+import MyTable from './MyTable.vue'
+const headTexts = [
+  { prop: 'name', label: '姓名' },
+  { prop: 'email', label: '邮箱' },
+  { prop: 'actions', label: '操作' },
+]
+
+const users = [
+  { id: 1, name: '张三', email: 'zhang@example.com' },
+  { id: 2, name: '李四', email: 'li@example.com' },
+  { id: 3, name: '张康', email: '1649412218@qq.com' },
+]
+</script>
+
+```
+
