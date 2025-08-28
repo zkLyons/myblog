@@ -2030,7 +2030,7 @@ export default {
 
 > [!WARNING]
 >
-> ```
+> ```vue
 > <template>
 > <ChildComponent @click="handleEvent" />
 > </template>
@@ -2044,7 +2044,7 @@ export default {
 >
 > 解决办法，在click事件后加上native属性，表明原生身份。
 >
-> ```
+> ```vue
 > <template>
 > <ChildComponent @click.native="handleEvent" />
 > </template>
@@ -2647,7 +2647,7 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 
 
-```
+```html
 <div :style="{ color: fcolor }"></div>
 ```
 
@@ -2655,9 +2655,10 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 **错误写法**
 
-```
+```html
 <div :style="color: fcolor"></div>
 ```
+
 
 `:style` 指令需要接收一个 JavaScript 对象，格式为：  
 
@@ -2689,9 +2690,6 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 </div>
 ```
 
-
-
-```vue
 <div :style="{ 
              'width':'28px',
              color: fcolor, 
@@ -2703,12 +2701,6 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
      >
   动态绑定多个样式
 </div>
-```
-
-
-
-
-
 
 **CSS 属性名如果是 驼峰式 (fontSize)**
 
@@ -2747,6 +2739,188 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 • 必须用 `{ }` 包裹样式对象。
 • 键名若包含连字符（如 `font-size`），需加引号：`'font-size'`。
 • 确保绑定的变量（如 `fcolor`）是响应式的（定义在 `data` 或 `computed` 中）。
+
+------
+
+
+
+### Vue3中v-model双向数据绑定的原理
+
+对于 `v-model`，针对不同的元素，它背后有两种完全不同的机制：
+
+1. 针对原生 HTML 元素（`<input>`、`<textarea>` 等）
+
+   `v-model` 是一个简单的语法糖，用来绑定 `value` 属性和监听原生的 **`input` 事件**。它会自动将 `value` 属性与
+
+   你的变量关联起来，并使用 `input` 事件来更新它。
+
+```
+<template>
+  <div>
+    <input v-model="msg" ></input>
+
+  </div>
+</template>
+<script setup lang="ts">
+import { ref } from "vue";
+const msg = ref("我爱你塞北的雪");
+</script>
+<style scoped></style>
+
+```
+
+```
+<input v-model="count" />
+```
+
+这等同于：
+
+```
+<input :value="count" @input="count = $event.target.value" />
+```
+
+2. 针对自定义 Vue 组件
+
+父组件：
+
+```vue
+<template>
+  <div>
+    <h1>{{ count }}------{{ msg }}--{{ info }}</h1>
+    <MyInput
+      v-model:count="count"
+      v-model="msg"
+    ></MyInput>
+  </div>
+</template>
+<script setup lang="ts">
+import { ref } from "vue";
+import MyInput from "./myInput.vue";
+const msg = ref("我爱你塞北的雪");
+const info = ref("菲律宾今天惹咱们!!!!");
+const count = ref(1);
+const pageSize = ref(10);
+function handler01(num: number) {
+  console.log(num, 22);
+  console.log(count, msg);
+}
+</script>
+<style scoped></style>
+
+```
+
+子组件：
+
+```vue
+<template>
+  myINput:
+  <input :value="modelValue"  @input="handler"/>
+  <br></br>
+  <input :value="count" @input="handler1"/>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
+let a=ref(100)
+// 1. 接收 modelValue prop
+defineProps(["modelValue","count"]);
+
+// 2. 声明 update:modelValue 事件
+let $emit=defineEmits(['update:modelValue','update:count']);
+
+function handler(e){
+    $emit('update:modelValue', e.target.value)
+}
+
+function handler1(e){
+    $emit('update:count',e.target.value)
+}
+</script>
+```
+
+`以上向子组件使用v-model的操作可以看做是手动实现了双向数据绑定`
+
+```vue
+    <MyInput v-model:count="count" ></MyInput>
+```
+
+v-model是语法糖，vue编译器会将上句解析为：
+
+```vue
+<MyInput :count="count" @updata:count="count=$event.target.value"></MyInput>
+```
+
+这个时候，需要到MyInput显示的接受参数，显示的定义自定义事件。
+
+
+
+> [!important]
+>
+> 问题1：下面语句意味着什么？
+>
+> ```
+> <MyInput v-model="count" ></MyInput>
+> ```
+>
+> 会被编译器解析为：
+>
+> ```vue
+> <MyInput :modelValue="count" @updata:ModelValue="count=$event.target.value"></MyInput>
+> ```
+>
+> 使用v-model给子组件绑定参数的时候，默认的参数名称就是modelValue，绑定的事件名字为 @updata:ModelValue，在子组件后续定义自定义事件的时候也一定写这个名字，定义其他的双向数据绑定就会失效。
+
+
+
+> [!important]
+>
+> 问题2：
+>
+> 对子组件使用v-model绑定数据count，如果我后续将默认的 @updata:ModelValue方法绑定为其他的方法,双向绑定会
+>
+> 失效吗？
+>
+> ```vue
+> <MyInput :modelValue="count" @updata:ModelValue="handler"></MyInput>
+> 
+> ...
+> function handler(){
+> console.log(111)
+> }
+> ```
+>
+> 答：并不会，可以认为这里有两个更新事件方法，（1） @updata:ModelValue="count=$event.target.value"，（2）@updata:ModelValue="handler"，vue会首先执行第一个，再执行第二个，最后双向数据绑定的功能并不受影响。
+
+> [!important]
+>
+> 问题3：
+>
+> 在子组件中，对传入的参数count，可以将其双向绑定到子组件内部的原生input吗？
+>
+> ```vue
+> <input v-model="count"/>
+> ```
+>
+> 答:不可以，参数prop要遵循单项数据流动原则，传入的数据不能够更改，count只能在父组件中修改。这样写意味着在子组件中修改count，最后会报错的。
+
+
+
+> 问题4：
+>
+> 原生input可以绑定非value默认参数吗？
+>
+> ```vue
+> <input v-mode:count="count"/>
+> ```
+>
+> 答:不可以.只有默认值为value，事件固定为input
+
+ 
+
+
+
+
 
 ### vue3中组件之间通信的方法
 
@@ -2813,7 +2987,7 @@ const $emits = defineEmits(['update:pageNo','update:pageSize'])
 
 > [!Note]
 >
-> 事件绑定
+> 事件绑定$event
 
 | 用法                     | 是否正确 | 说明                                     |
 | ------------------------ | -------- | ---------------------------------------- |
@@ -2823,7 +2997,7 @@ const $emits = defineEmits(['update:pageNo','update:pageSize'])
 | `@event="() => fn(val)"` | ✅        | 显式传参                                 |
 | `@event="fn(val)"`       | ❌        | 会立即执行，**不是绑定**                 |
 
-#### 2.ref（父---》子）
+#### 2.ref（父--->子）
 
 父组件
 
@@ -3997,7 +4171,7 @@ import Card from './card.vue'
 
 ```
 
-![image-20250826202850000](./assets/image-20250826202850000-1756293276717-1.png)
+![image-20250826202850000](./assets/image-20250826202850000.png)
 
 【实例2：作用域插槽】
 
@@ -4140,4 +4314,187 @@ const users = [
 </script>
 
 ```
+
+
+
+### defineProps
+
+`defineProps`是什么：
+
+`defineProps`是 Vue 3 `<script setup>` 语法中的一个**编译器宏（Compiler Macro）**，用于在组件中声明**`props`**。
+
+它不需要像普通的函数那样被导入，因为它是在编译时被处理的。它的主要作用是让你可以使用基于**类型**的方式来定义组件的`props`，而不是像 Vue 2 中那样使用 `props` 选项。
+
+**语法**
+
+在 `<script setup>` 中，你可以使用两种方式来定义 `props`：**基于运行时**和**基于类型**。
+
+
+
+1. 基于运行时声明（更常用）
+
+
+
+这种方式与传统的 `props` 选项非常相似，只是语法更简洁。
+
+代码段
+
+```
+<script setup>
+import { ref } from 'vue'
+// 定义一个名为 'title' 的 props，类型为 String
+const props = defineProps({
+  title: String,
+  // 定义一个名为 'count' 的 props，类型为 Number，且是必需的
+  count: {
+    type: Number,
+    required: true
+  },
+  // 定义一个名为 'list' 的 props，类型为 Array，并设置默认值
+  list: {
+    type: Array,
+    default: () => []
+  }
+})
+
+// 在模板或脚本中访问 props
+console.log(props.title)
+</script>
+```
+
+其还有简写形式：
+
+```vue
+const props = defineProps(['count','list']);
+```
+
+
+
+2. 基于类型声明（需要 TypeScript）
+
+
+
+这种方式提供了更好的类型检查和代码提示，尤其是在使用 TypeScript 时。
+
+```
+<script setup lang="ts">
+// 引入类型
+import { type PropType } from 'vue'
+
+// 使用类型来定义 props
+const props = defineProps<{
+  // 简单类型
+  title: string
+  // 复杂类型
+  count: number
+  // 可选 props
+  name?: string
+  // 带默认值的 props
+  list: string[]
+}>()
+
+// 对于需要默认值、必需等选项的复杂场景，可以使用 withDefaults
+// const propsWithDefaults = withDefaults(defineProps<{
+//   msg?: string
+//   labels?: string[]
+// }>(), {
+//   msg: 'hello',
+//   labels: () => ['one', 'two']
+// })
+
+// 在模板或脚本中访问 props
+console.log(props.title)
+</script>
+```
+
+------
+
+### defineEmits
+
+
+
+`defineEmits`是 Vue 3 `<script setup>` 语法中的一个**编译器宏（Compiler Macro）**，用于在组件中声明**自定义事件**。
+
+它不需要像普通的函数那样被导入，因为它是在编译时被处理的。它的主要作用是让你可以声明组件可以触发哪些事件，从而在父组件中监听这些事件。
+
+------
+
+**为什么使用`defineEmits`**
+
+- **更好的可读性**：通过声明事件，你可以清楚地知道一个子组件可以向外传递哪些事件。这使得组件的 API 更加明确。
+- **类型安全**：在 TypeScript 项目中，`defineEmits` 提供了强大的类型推断和校验功能，可以确保你触发的事件名和参数类型是正确的。
+- **避免拼写错误**：由于事件名被预先声明，如果你在触发时拼写错误，TypeScript 编译器会立即报错，避免了在运行时才发现问题。
+
+------
+
+**语法**
+
+
+
+在 `<script setup>` 中，你可以使用两种方式来定义事件：**基于运行时**和**基于类型**。
+
+
+
+1. 基于运行时声明（更常用）
+
+
+
+这种方式与传统的 `emits` 选项非常相似，但语法更简洁。`defineEmits` 返回一个 `emit` 函数，你可以用它来触发事件。
+
+```
+<script setup>
+// 定义一个名为 'update' 的事件
+// 定义一个名为 'submit' 的事件，并带有验证
+const $emit = defineEmits(['update', 'submit'])
+
+// 触发事件
+const handleClick = () => {
+  // 触发 'update' 事件，不带参数
+  $emit('update')
+
+  // 触发 'submit' 事件，并传递一个对象参数
+  $emit('submit', {
+    message: '表单已提交'
+  })
+}
+</script>
+```
+
+
+
+**2. 基于类型声明（需要 TypeScript）**
+
+
+
+这种方式提供了最强的类型安全，是 Vue 3 结合 TypeScript 的推荐用法。
+
+代码段
+
+```
+<script setup lang="ts">
+// 使用类型来声明 emit 函数及其事件
+const $emit = defineEmits<{
+  // 声明 'update' 事件，不带参数
+  (e: 'update'): void
+  // 声明 'submit' 事件，带一个对象参数
+  (e: 'submit', payload: { message: string }): void
+}>()
+
+// 触发事件
+const handleClick = () => {
+  $emit('update')
+  $emit('submit', {
+    message: '表单已提交'
+  })
+}
+</script>
+```
+
+如果你在调用 `emit('submit', '错误的参数')` 时传递了错误的参数类型，TypeScript 编译器会立即报错，这极大地提高了代码的健壮性。
+
+------
+
+### defineExpose
+
+### defineOptions
 
