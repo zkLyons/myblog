@@ -21,6 +21,9 @@
    - **用户体验**：提供一个专业的`favicon.ico`可以提升用户体验，让用户感觉到网站的专业性和完整性。
 
 
+
+
+
    ### 如何添加 `favicon.ico`？
 
 
@@ -1189,249 +1192,6 @@ prototype:{
 
 
 
-#### v-bind
-
-`v-bind` 是 Vue3 中非常重要的一个指令，它的作用是用来动态地绑定一个或多个 attribute，或者一个组件 prop 到表达式。
-
-通俗地讲，它就是 Vue **让 HTML 的 attribute 和 JavaScript 的数据变量建立起连接** 的桥梁。当数据发生变化时，`v-bind` 绑定的 attribute 也会自动更新。
-
-**1.单独绑定一个属性，动态绑定属性值class**
-
-```vue
-//类名可以根据activeClass动态变换
-<template>
-  <!-- v-bind的使用 -->
-  <div class="use_v-bild">
-    <div v-bind:class="activeClass"></div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-let activeClass = ref('active')
-activeClass.value = 'deactive'
-</script>
-
-<style scoped lang="scss">
-.active {
-  width: 100px;
-  height: 100px;
-  background-color: red;
-}
-.deactive {
-  width: 100px;
-  height: 100px;
-  background-color: blue;
-}
-</style>
-
-```
-
-`v-bind的简写形式为`
-
-```
-v-bind:class="activeClass" 等同于 :class="activeClass"
-```
-
-```vue
-<template>
-  <!-- v-bind的使用 -->
-  <div class="use_v-bild">
-      //加上括号是对象语法，它的结构是 { '键': 布尔值表达式 }
-      //这种写法是不对的，不符合键值的形式
-    <div :class="{has?'active':'deactive'}"></div>
-      //这种写法正确，三元表达式
-    <div :class="has ? 'active' : 'deactive'"></div>
-      //这种写法是正确的对象语法形式
-    <div :class="{'active':has}"></div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-let activeClass = ref('active')
-activeClass.value = 'deactive'
-</script>
-
-<style scoped lang="scss">
-.active {
-  width: 100px;
-  height: 100px;
-  background-color: red;
-}
-.deactive {
-  width: 100px;
-  height: 100px;
-  background-color: blue;
-}
-</style>
-
-```
-
-**2.动态绑定style**
-
-```vue
-<template>
-  <!-- v-bind的使用 -->
-  <div class="use_v-bild">
-    <div :class="{ 'active': has }" :style="{ 'color': color1,'fontSize':size+'px' }">123</div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-let color1 = ref('skyblue')
-let size=ref(40)
-</script>
-
-<style scoped lang="scss">
-.active {
-  width: 100px;
-  height: 100px;
-  background-color: red;
-}
-.deactive {
-  width: 100px;
-  height: 100px;
-  background-color: blue;
-}
-</style>
-
-```
-
-**3.绑定组件props**
-
-父组件向子组件传递数据
-
-```vue
-<template>
-  <div>404</div>
-  <Bind :texta="text" :isright="isright"></Bind>
-  <div v-bind="obj"></div>
-  <div class="active" id="Elcontainer"></div>
-</template>
-
-<script setup lang="ts">
-import Bind from './v-bind.vue'
-import { ref, reactive } from 'vue'
-let text = ref('beautiful')
-let isright = ref(false)
-let obj = reactive({
-  id: 'ElContainer',
-  class: 'active',
-})
-</script>
-
-<style scoped>
-.active {
-  width: 100px;
-  height: 100px;
-  color: red;
-  background-color: yellow;
-}
-</style>
-
-```
-
-子组件接收调用数据
-
-```vue
-<template>
-  <div>{{ texta }}+{{ isright }}</div>
-</template>
-
-<script setup lang="ts">
-const props = defineProps({
-  texta: {
-    type: String,
-    required: true,
-  },
-  isright: Boolean,
-})
-// 你可以直接在模板中使用 props 中定义的变量
-// 例如: {{ texta }} 和 {{ isright }}
-// 在 <script setup> 内部，你可以通过 props.texta 访问
-console.log(props.texta)
-</script>
-
-<style scoped></style>
-
-```
-
-**4.绑定所有属性（对象展开）**
-
-如果你想一次性绑定一个对象中的所有属性，可以使用不带参数的 `v-bind`。
-
-```vue
-<template>
-  <div v-bind="obj"></div>
-//结果等同于
-</template>
-
-<script setup lang="ts">
-let obj = reactive({
-  id: 'ElContainer',
-  class: 'active',
-})
-</script>
-
-<style scoped>
-.active {
-  width: 100px;
-  height: 100px;
-  background-color: yellow;
-}
-</style>
-
-```
-
-
-
-**5.传递函数**
-
-```vue
-//父组件传递参数
-
-<template>
-  <Bind :greet="fgreet"></Bind>
-</template>
-<script setup lang="ts">
-import Bind from './v-bind.vue'
-function fgreet(content: string) {
-  console.log(content)
-}
-</script>
-<style scoped></style>
-
-```
-
-
-
-```vue
-//子组件接受函数
-
-<template>
-  <button @click="callParentMethod"></button>
-</template>
-
-<script setup lang="ts">
-const props = defineProps({
-  greet: {
-    type: Function,
-    required: true,
-  },
-})
-const callParentMethod = () => {
-  props.greet('hello from child component')
-}
-</script>
-
-<style scoped></style>
-
-```
-
-
-
 
 
 
@@ -1440,7 +1200,7 @@ const callParentMethod = () => {
 
 ### 组件间传递数据的方式
 
-#### **一、子组件向父组件传递数据**
+#### 一、子组件向父组件传递数据
 
 前置知识：
 
@@ -1675,7 +1435,7 @@ $on：用于自定义事件监听，监听事件customEvent的同时，触发后
 
 
 
-#### **二、父组件向子组件传递数据**
+#### 二、父组件向子组件传递数据
 
 `1.使用props`
 
@@ -1774,7 +1534,7 @@ $on：用于自定义事件监听，监听事件customEvent的同时，触发后
 
    
 
-#### 三、**非父子组件传递数据**
+#### 三、非父子组件传递数据
 
 
 
@@ -2641,9 +2401,258 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 
 
 
+------
+
+### v-bind
+
+`v-bind` 是 Vue3 中非常重要的一个指令，它的作用是用来动态地绑定一个或多个 attribute，或者一个组件 prop 到表达式。
+
+通俗地讲，它就是 Vue **让 HTML 的 attribute 和 JavaScript 的数据变量建立起连接** 的桥梁。当数据发生变化时，`v-bind` 绑定的 attribute 也会自动更新。
+
+**1.单独绑定一个属性，动态绑定属性值class**
+
+```vue
+//类名可以根据activeClass动态变换
+<template>
+  <!-- v-bind的使用 -->
+  <div class="use_v-bild">
+    <div v-bind:class="activeClass"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+let activeClass = ref('active')
+activeClass.value = 'deactive'
+</script>
+
+<style scoped lang="scss">
+.active {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+}
+.deactive {
+  width: 100px;
+  height: 100px;
+  background-color: blue;
+}
+</style>
+
+```
+
+`v-bind的简写形式为`
+
+```
+v-bind:class="activeClass" 等同于 :class="activeClass"
+```
+
+```vue
+<template>
+  <!-- v-bind的使用 -->
+  <div class="use_v-bild">
+      //加上括号是对象语法，它的结构是，{ 键: 变量值, ... }  在解析对象的时候只会解析value值，而不会解析key值，所以键值带不带‘引号’都可以
+      //这种写法是不对的，不符合键值的形式
+    <div :class="{has?'active':'deactive'}"></div>
+      //这种写法正确，三元表达式
+    <div :class="has ? 'active' : 'deactive'"></div>
+      //这种写法是正确的对象语法形式
+    <div :class="{'active':has}"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+let activeClass = ref('active')
+activeClass.value = 'deactive'
+</script>
+
+<style scoped lang="scss">
+.active {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+}
+.deactive {
+  width: 100px;
+  height: 100px;
+  background-color: blue;
+}
+</style>
+
+```
+
+**2.动态绑定style**
+
+```vue
+<template>
+  <!-- v-bind的使用 -->
+  <div class="use_v-bild">
+    <div :class="{ 'active': has }" :style="{ 'color': color1,'fontSize':size+'px' }">123</div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+let color1 = ref('skyblue')
+let size=ref(40)
+</script>
+
+<style scoped lang="scss">
+.active {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+}
+.deactive {
+  width: 100px;
+  height: 100px;
+  background-color: blue;
+}
+</style>
+
+```
+
+**3.绑定组件props**
+
+父组件向子组件传递数据
+
+```vue
+<template>
+  <div>404</div>
+  <Bind :texta="text" :isright="isright"></Bind>
+  <div v-bind="obj"></div>
+  <div class="active" id="Elcontainer"></div>
+</template>
+
+<script setup lang="ts">
+import Bind from './v-bind.vue'
+import { ref, reactive } from 'vue'
+let text = ref('beautiful')
+let isright = ref(false)
+let obj = reactive({
+  id: 'ElContainer',
+  class: 'active',
+})
+</script>
+
+<style scoped>
+.active {
+  width: 100px;
+  height: 100px;
+  color: red;
+  background-color: yellow;
+}
+</style>
+
+```
+
+子组件接收调用数据
+
+```vue
+<template>
+  <div>{{ texta }}+{{ isright }}</div>
+</template>
+
+<script setup lang="ts">
+const props = defineProps({
+  texta: {
+    type: String,
+    required: true,
+  },
+  isright: Boolean,
+})
+// 你可以直接在模板中使用 props 中定义的变量
+// 例如: {{ texta }} 和 {{ isright }}
+// 在 <script setup> 内部，你可以通过 props.texta 访问
+console.log(props.texta)
+</script>
+
+<style scoped></style>
+
+```
+
+**4.绑定所有属性（对象展开）**
+
+如果你想一次性绑定一个对象中的所有属性，可以使用不带参数的 `v-bind`。
+
+```vue
+<template>
+  <div v-bind="obj"></div>
+//结果等同于
+</template>
+
+<script setup lang="ts">
+let obj = reactive({
+  id: 'ElContainer',
+  class: 'active',
+})
+</script>
+
+<style scoped>
+.active {
+  width: 100px;
+  height: 100px;
+  background-color: yellow;
+}
+</style>
+
+```
 
 
-### 使用v-on绑定数据
+
+**5.传递函数**
+
+```vue
+//父组件传递参数
+
+<template>
+  <Bind :greet="fgreet"></Bind>
+</template>
+<script setup lang="ts">
+import Bind from './v-bind.vue'
+function fgreet(content: string) {
+  console.log(content)
+}
+</script>
+<style scoped></style>
+
+```
+
+
+
+```vue
+//子组件接受函数
+
+<template>
+  <button @click="callParentMethod"></button>
+</template>
+
+<script setup lang="ts">
+const props = defineProps({
+  greet: {
+    type: Function,
+    required: true,
+  },
+})
+const callParentMethod = () => {
+  props.greet('hello from child component')
+}
+</script>
+
+<style scoped></style>
+
+```
+
+
+
+------
+
+
+
+
+
+#### 使用v-bind绑定数据的一些注意事项
 
 
 
@@ -2651,14 +2660,11 @@ Proxy(person) → 拦截操作 → 通过 person 操作代理后的对象
 <div :style="{ color: fcolor }"></div>
 ```
 
----
-
 **错误写法**
 
 ```html
 <div :style="color: fcolor"></div>
 ```
-
 
 `:style` 指令需要接收一个 JavaScript 对象，格式为：  
 
@@ -2690,6 +2696,9 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
 </div>
 ```
 
+
+
+```vue
 <div :style="{ 
              'width':'28px',
              color: fcolor, 
@@ -2701,10 +2710,12 @@ Vue 会尝试将 `color: fcolor` 当作一个 JavaScript 表达式求值，但�
      >
   动态绑定多个样式
 </div>
+```
+
+
+
 
 **CSS 属性名如果是 驼峰式 (fontSize)**
-
-
 
 ```html
 <div :style="{ fontSize: fontSizeVar }"></div>
@@ -2997,7 +3008,7 @@ const $emits = defineEmits(['update:pageNo','update:pageSize'])
 | `@event="() => fn(val)"` | ✅        | 显式传参                                 |
 | `@event="fn(val)"`       | ❌        | 会立即执行，**不是绑定**                 |
 
-#### 2.ref（父--->子）
+#### 2.ref（父传子）
 
 父组件
 
@@ -3068,7 +3079,7 @@ const count = reactive(0); // 无效！
 3. 组件/DOM → 必须 `ref`
 4. 不确定时 → 无脑 `ref`
 
-#### 3.自定义事件（子---》父）
+#### 3.自定义事件（子传父）
 
 ```
 //子组件 spuForm
@@ -3105,7 +3116,7 @@ const handler=(obj:any)=>{
 
 
 
-### --nextTick()
+### nextTick()
 
 `nextTick()` 是 Vue.js 提供的一个核心方法，用于在 DOM 更新周期后 执行延迟回调。它的核心作用是解决数据变化后立即操作 DOM 可能导致的时机问题。以下是详细使用指南：
 
@@ -3317,7 +3328,7 @@ export default {
 
 这个例子清晰展示了 `nextTick` 如何解决 DOM 更新的异步延迟问题。
 
-### --ref在动态引入dom中的多种用法
+### ref在动态引入dom中的多种用法
 
 #### 动态用法
 
