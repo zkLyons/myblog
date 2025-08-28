@@ -14,7 +14,7 @@ export default hopeTheme({
   // 导航栏logo
   logo:"/logo2.png",
   // 默认导航到github
-  repo: "/zkLyons/myblog",
+  repo: "/zkLyons",
 
   docsDir: "src",
 
