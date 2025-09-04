@@ -2239,7 +2239,7 @@ const copy = structuredClone(original);
 • **关键工具**：`structuredClone`、`JSON.parse(JSON.stringify())`、Lodash 的 `cloneDeep`。
 • **注意事项**：根据数据类型选择合适方法，避免因未完全复制导致的逻辑错误。
 
-### 13...args:**拓展运算符**
+### 13...args:拓展运算符
 
 “const shallowCopy = { ...original };” 这句代码是 JavaScript 中利用扩展运算符（...）实现对象浅拷贝的操作。
 
@@ -2378,38 +2378,28 @@ const obj = { name: "Alice", age: 25 };
   console.log(sum(...arr)); // 使用扩展运算符将数组展开为独立的参数
   ```
 
-```
-  const redPuzzles = ["四时运转", "灾变", "四时运转", "天象"];
-      const bluePuzzles = ["四时运转", "月令禁忌", "天象"];
-      const greenPuzzles = ["月令禁忌", "天象", "四时运转", "天象"];
-      const resultPuzzles = collectPuzzle(
-        redPuzzles,
-        bluePuzzles,
-        greenPuzzles
-      );
+```js
+const redPuzzles = ["四时运转", "灾变", "四时运转", "天象"];
+const bluePuzzles = ["四时运转", "月令禁忌", "天象"];
+const greenPuzzles = ["月令禁忌", "天象", "四时运转", "天象"];
+const resultPuzzles = collectPuzzle(
+redPuzzles,
+bluePuzzles,
+greenPuzzles
+);
       
- function collectPuzzle(...puzzles) {
-  console.log(puzzles)//[Array(4), Array(3), Array(4)]
-  // 
- [['四时运转', '灾变', '四时运转', '天象'], ['四时运转', '月令禁忌', '天象'],['月令禁忌', '天象', '四时运转', '天象']]
- let arr =puzzles.flat(1)//降维度
- //arr:['四时运转', '灾变', '四时运转', '天象','四时运转', '月令禁忌', '天象','月令禁忌', '天象', '四时运转', '天象']
- //去重
- let set = new Set(arr)
- arr =[...set]
- //arr=Array.from(set)
- 
- 
-
+function collectPuzzle(...puzzles) {
+console.log(puzzles)//[Array(4), Array(3), Array(4)]
+// [['四时运转', '灾变', '四时运转', '天象'], ['四时运转', '月令禁忌', '天象'],['月令禁忌', '天象', '四时运转', '天象']]
+let arr =puzzles.flat(1)//降维度
+//arr:['四时运转', '灾变', '四时运转', '天象','四时运转', '月令禁忌', '天象','月令禁忌', '天象', '四时运转', '天象']
+//去重
+let set = new Set(arr)
+arr =[...set]
+//arr=Array.from(set)
 }     
       
 ```
-
-
-
-
-
-
 
 2. **为什么说“展开”**
 
@@ -2540,7 +2530,6 @@ console.log(mentalMethod('峨眉', '武当', '少林')());
 
 ```
 function mentalMethod(...args) {
-    // TODO 待补充代码  
     return (...args1) => !args1.length? `战胜${args.join(',')}` : mentalMethod(...args,...arg1)
 }
 ```
@@ -4207,4 +4196,214 @@ Object.assign(attrParams, {
 ✅ 推荐使用 `Object.assign` 来安全地更新响应式对象！
 
 
+
+### 防抖节流
+
+#### 防抖
+
+**概念**：在事件被触发后，延迟执行函数，如果在延迟期间再次触发，则重新计时。
+
+**特点**：只有在停止触发一段时间后才执行，适合"只关心最后一次"的场景。
+
+例如我们在输入框输入一个单词‘china’，当单词输入完毕的时候，我们希望控制台输入单词‘china’，代码如下
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div >
+        <input type="text" class="fangdou">
+    </div>
+    </body>
+<script>
+    const input=document.querySelector('.fangdou')
+    input.addEventListener('input',output)
+    function output(e){
+        console.log(e.target.value)
+    }
+</script>
+</html>
+```
+
+
+
+![image-20250903210309621](./assets/image-20250903210309621.png)
+
+可是结果并不如我们想的那样，输入一个单词，控制台就输出一次，那么我们可以想一个办法，让控制台只输出最后一次输入时，input框里的结果。
+
+```js
+const input=document.querySelector('.fangdou')
+input.addEventListener('input',debounce)
+let timer=null;
+function debounce(e){
+ //这里可以加一个定时器，输入1s后输出，并且只保留最后一次一次的输出结果，也就是没开启一个定时器就把之前的定时器给清除掉
+if(timer) clearTimeout(timer)
+timer=setTimeout(()=>{
+    console.log(e.target.value)
+},1000)
+}
+
+```
+
+但是在实际的使用过程当中，如果是应对单一的输入框场景，可以完美的解决问题，但是遇到了复杂的项目，就会出现诸多难以解决的问题
+
+- 如果有多个input，全部都绑定到了debounce函数，那么多个input就有可能会互相干扰，因为他们共用一个timer，input1就有可能把input2的timer给清除了。
+- 复用性不高，核心的部分是console.log,这部分内容可能会经常发生变动,不能把它的内容给写死了,不然就无法复用和定制了.
+- 耦合性强,延迟时间是写死的
+
+
+
+所以我们需要做一些更改:
+
+```
+
+<script>
+    const input=document.querySelector('.fangdou')
+	//fa()是立即执行这个函数，最后返回核心逻辑函数。
+    const debounce=fa()
+    function fa(){
+        let timer=null;
+        return function(e){
+            if(timer) clearTimeout(timer)
+            timer=setTimeout(()=>{
+                console.log(e.target.value)
+            },1000)
+        }
+    }
+    input.addEventListener('input',debounce)
+
+</script>
+```
+
+也可以写成：
+
+```js
+
+<script>
+    const input=document.querySelector('.fangdou')
+    //debounce绑定立即执行函数的返回结果，也就是一个函数
+    const debounce=(function(){
+         let timer=null;
+        return function(e){
+            if(timer) clearTimeout(timer)
+            timer=setTimeout(()=>{
+                console.log(e.target.value)
+            },1000)
+        }
+    })()
+    input.addEventListener('input',debounce)
+</script>
+```
+
+让我们再提高一下复用性，为了方便传参，我们将debounce写成能够接受参数的形式
+
+```js
+
+  
+
+
+<script>
+    const input=document.querySelector('.fangdou')
+    const fn=function(e){
+        console.log(e.target.value)
+    }
+    const debounce=function(fn,delay){
+         let timer=null;
+        return function(...args){
+            if(timer) clearTimeout(timer)
+            timer=setTimeout(()=>{
+                fn.apply(this,args)
+            },delay)
+        }
+    }
+      input.addEventListener('input',debounce(fn,1000))
+</script>
+```
+
+不如写的再简便一点：
+
+```js
+
+<script>
+    const input=document.querySelector('.fangdou')
+    input.addEventListener('input',debounce(fn,1000))
+    //将事件处理的逻辑封装一下，便于复用。
+    function fn(e){
+        console.log(e.target.value)
+    }   
+    function debounce(fn,delay){
+        let timeout;
+        // 当点击事件发生的时候，就会返回这个函数作为input事件的执行函数，
+        // 然后将input事件对象e传递给这个函数，记args
+        //箭头函数没有this，其继承外层普通函数的this，返回的外层普通函数是由输入事件触发的，传入的参数也是输入事件，this指的就是input事件，this===e.target
+        return function(...args){
+            if(timeout) clearTimeout(timeout)
+            timeout=setTimeout(()=>{
+                fn.apply(this,args)
+            },delay)
+        }
+    }
+</script>
+```
+
+对于简单的fn，直接传递即可：
+
+```js
+
+<script>
+    const input=document.querySelector('.fangdou')
+    input.addEventListener('input',debounce(function(e){
+         console.log(e.target.value)
+    },1000))
+    function debounce(fn,delay){
+        let timeout;
+        // 当点击事件发生的时候，就会返回这个函数作为input事件的执行函数，
+        // 然后将input事件对象e传递给这个函数，记args
+        //箭头函数没有this，其继承外层普通函数的this，返回的外层普通函数是由输入事件触发的，传入的参数也是输入事件，this指的就是input事件，this===e.target
+        return function(...args){
+            if(timeout) clearTimeout(timeout)
+            timeout=setTimeout(()=>{
+                fn.apply(this,args)
+            },delay)
+        }
+    }
+</script>
+```
+
+
+
+#### 节流
+
+**节流和防抖的区别？**
+
+防抖：停止触发t秒后执行1次
+
+节流：每t秒最多执行1次，用于放置重复提交，定期搜集数据等。
+
+```js
+<script>
+    const input=document.querySelector('.fangdou')
+    const btn=document.querySelector('.btn')
+    btn.addEventListener('click',throttle(function(e){
+        console.log(e.target.value,'点击了按钮')
+    },2000))
+    function throttle(fn,delay){
+        let timer=null;
+        return function(...args){
+            //如果timer为空，那么我就是第一个点击的，后续的2s内的点击都不会通过此语句的判断。
+            if(!timer){
+                timer=setTimeout(()=>{
+                    fn.apply(this,args)
+                    timer=null
+                },delay)
+            }
+        }
+    }
+</script>
+```
 
