@@ -5658,3 +5658,546 @@ console.log(typeof element.dataset.isActive) // "string" (不是boolean)
 const isActive = element.dataset.isActive === 'true'
 const count = parseInt(element.dataset.count)
 ```
+
+### \<component>\</component>组件
+
+Vue中的`<component>`是一个内置的特殊元素，用于动态渲染不同的组件。它通过`is`属性来决定要渲染哪个组件。
+
+#### 基本用法 (setup语法糖)
+
+```vue
+<template>
+  <component :is="currentComponent"></component>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import ComponentA from './ComponentA.vue'
+import ComponentB from './ComponentB.vue'
+//component不要加引号
+const currentComponent = ref(ComponentA)
+
+// 或者使用字符串形式（需要在components中注册）
+// const currentComponent = ref('ComponentA')
+</script>
+```
+
+#### 标签页切换示例
+
+```vue
+<template>
+  <div>
+    <div class="tabs">
+      <button v-for="tab in tabs" :key="tab.name" :class="{ active: currentTab === tab.component }"  @click="currentTab = tab.component" >
+        {{ tab.name }}
+      </button>
+    </div>
+    
+    <component :is="currentTab" :user="user"></component>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+import Home from './components/Home.vue'
+import About from './components/About.vue'
+import Contact from './components/Contact.vue'
+
+const currentTab = ref(Home)
+const user = reactive({
+  name: 'John',
+  id: 1
+})
+
+const tabs = [
+  { name: '首页', component: Home },
+  { name: '关于', component: About },
+  { name: '联系', component: Contact }
+]
+</script>
+```
+
+#### 使用computed进行条件渲染
+
+```vue
+<template>
+//update是自定义事件。componenttorender子组件里面一定定义并出发了名为update的事件。
+  <component  :is="componentToRender"  :data="componentData" @update="handleUpdate" />
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import AdminPanel from './AdminPanel.vue'
+import UserPanel from './UserPanel.vue'
+import GuestPanel from './GuestPanel.vue'
+
+const userRole = ref('user')
+const componentData = ref({ message: 'Hello' })
+
+const componentToRender = computed(() => {
+  switch (userRole.value) {
+    case 'admin': return AdminPanel
+    case 'user': return UserPanel
+    default: return GuestPanel
+  }
+})
+
+const handleUpdate = (data) => {
+  componentData.value = { ...componentData.value, ...data }
+}
+</script>
+```
+
+#### 配合KeepAlive使用
+
+```vue
+<template>
+  <div>
+    <button @click="toggleComponent">切换组件</button>
+    //保留浏览记忆，可以完整返回到上一个点击的路由
+    <KeepAlive>
+      <component :is="currentComponent" :key="componentKey"/>
+    </KeepAlive>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import ComponentA from './ComponentA.vue'
+import ComponentB from './ComponentB.vue'
+
+const currentComponent = ref(ComponentA)
+const componentKey = ref('A')
+
+const toggleComponent = () => {
+  if (currentComponent.value === ComponentA) {
+    currentComponent.value = ComponentB
+    componentKey.value = 'B'
+  } else {
+    currentComponent.value = ComponentA
+    componentKey.value = 'A'
+  }
+}
+</script>
+```
+
+### \<router-view>\</router-view>
+
+#### 基本用法
+
+`<router-view>` 是 Vue Router 的核心组件，用于显示与当前路由匹配的组件内容。
+
+**基本用法**
+
+```vue
+<template>
+  <div id="app">
+    <nav>
+        //可点击的导航文字
+      <router-link to="/">首页</router-link>
+      <router-link to="/about">关于</router-link>
+    </nav>
+    
+    <!-- 路由匹配的组件将在这里显示 -->
+    <router-view />
+  </div>
+</template>
+```
+
+对应的路由配置：
+
+```js
+// router/index.js
+const routes = [
+  { path: '/', component: Home },
+  { path: '/about', component: About }
+]
+```
+
+**嵌套路由中的 router-view**
+
+多层嵌套结构
+
+```js
+// 路由配置
+const routes = [
+  {
+    path: '/admin',
+    component: AdminLayout,
+    children: [
+      { path: 'users', component: UserList },
+      { path: 'settings', component: Settings },
+      {
+        path: 'mine/:id',
+        component: Mine 
+        children:[
+         { path: '', component: UserHome },
+         { path: 'profile', component: UserProfile },
+         { path: 'posts', component: UserPosts }
+          ],
+      },
+    ]
+  }
+]
+<!-- AdminLayout.vue -->
+<template>
+  <div class="admin-layout">
+    <aside>侧边栏</aside>
+    <main>
+      <!-- 只要访问了/admin/users或者是/admin/settings，这是AdminLayout的子组件，就会将其子组件的内容展示到这个位置。 -->
+      <!-- 子路由组件在这里显示 -->
+      <router-view />
+    </main>
+  </div>
+</template>
+```
+
+访0问 `/admin/mine/123/profile` 或直接访问`/admin/mine/:id/profile`时：
+
+- 外层 `router-view` 渲染 `admin` 组件(外层组件值得是admin的父组件，可能是app)
+- `mine` 组件内的 `router-view` 渲染 `UserProfile` 组件
+
+
+
+
+
+**命名视图 (Named Views)**
+
+当需要同时显示多个组件时使用,可以使用命名路由（命名路由和嵌套路由是两种不同的方式，不可以混着用）
+
+```js
+const routes = [
+  {
+    path: '/',
+    components: {
+      default: Home,
+      sidebar: () => import('@/views/admin/sidebar/index.vue'),,
+      footer: Footer
+    }
+  }
+]
+```
+
+```vue
+//父组件
+<template>
+  <div>
+    <!-- 默认视图 -->
+    <router-view />
+    
+    <!-- 命名视图 -->
+    <router-view name="sidebar" />
+    <router-view name="footer" />
+  </div>
+</template>
+```
+
+#### 插槽
+
+作用域插槽用法
+
+- 基本作用域插槽
+
+```vue
+<template>
+//router-view接受到的Component是其子组件，例如上例中AdminLayout的settings子组件，当访问/admin/settings的时候，Component就代表settings组件。
+  <router-view v-slot="{ Component, route }">
+    <div>
+      <h2>当前路由: {{ route.path }}</h2>
+      <component :is="Component" />
+    </div>
+  </router-view>
+</template>
+```
+
+- 可用的插槽属性
+
+```vue
+<router-view v-slot="{ Component, route }">
+  <!-- Component: 要渲染的组件 -->
+  <!-- route: 当前路由对象 -->
+  <div class="route-info">
+    <p>路径: {{ route.path }}</p>
+    <p>参数: {{ route.params }}</p>
+    <p>查询: {{ route.query }}</p>
+  </div>
+  <component :is="Component" />
+</router-view>
+```
+
+
+
+#### 配合 KeepAlive 使用
+
+- 缓存所有路由组件
+
+```vue
+<template>
+  <router-view v-slot="{ Component }">
+      //加上keepalive后，发生组件切换，路由组件并不会销毁，而是存储在缓存当中
+    <KeepAlive>
+      <component :is="Component" />
+    </KeepAlive>
+  </router-view>
+</template>
+```
+
+- 条件缓存
+
+```vue
+<template>
+  <router-view v-slot="{ Component, route }">
+    <KeepAlive :include="route.meta.keepAlive ? [route.name] : []">
+      <component :is="Component" :key="route.fullPath" />
+    </KeepAlive>
+  </router-view>
+</template>
+```
+
+路由配置：
+
+```js
+const routes = [
+  {
+    path: '/list',
+    name: 'List',
+    component: List,
+    meta: { keepAlive: true }  // 需要缓存
+  },
+  {
+    path: '/detail',
+    name: 'Detail', 
+    component: Detail,
+    meta: { keepAlive: false } // 不缓存
+  }
+]
+```
+
+
+
+#### 组件生效的几种方式
+
+只要路由发生切换，`<router-view>` 就会自动显示对应的新组件。
+
+路由切换的各种方式：
+
+- 1. 编程式导航
+
+```vue
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 各种切换路由的方式
+const goToHome = () => {
+  router.push('/')           // 推入新路由
+}
+
+const goToUser = () => {
+  router.push('/user/123')   // 带参数
+}
+
+const replaceRoute = () => {
+  router.replace('/about')   // 替换当前路由
+}
+
+const goBack = () => {
+  router.go(-1)             // 后退
+  // 或者 router.back()
+}
+</script>
+```
+
+- 2. 声明式导航
+
+```vue
+<template>
+  <!-- 点击这些链接也会切换路由 -->
+  <router-link to="/">首页</router-link>
+  <router-link to="/about">关于</router-link>
+  <router-link :to="{ name: 'User', params: { id: 123 }}">用户</router-link>
+</template>
+```
+
+- 3. 浏览器地址栏直接输入
+
+用户直接在地址栏输入URL，也会触发路由切换。
+
+
+
+一般情况，发生路由切换的时候，之前的路由会被销毁，但是有以下两种特殊情况：
+
+- 1. 相同路由但参数不同
+
+```js
+// 路由配置
+{ path: '/user/:id', component: User }
+```
+
+从 `/user/1` 切换到 `/user/2` 时：
+
+- 默认情况下，`User` 组件会被复用，不会重新创建
+- 如果需要强制重新创建，可以添加 `key`：
+
+```vue
+<router-view :key="$route.fullPath" />
+```
+
+- 2. 使用 KeepAlive 时
+
+```vue
+<router-view v-slot="{ Component }">
+  <KeepAlive>
+    <component :is="Component" />
+  </KeepAlive>
+</router-view>
+```
+
+被缓存的组件在路由切换时不会被销毁，而是被保存在内存中。
+
+#### 路由生效顺序
+
+1. **App.vue**：作为根组件，默认将第一级路由组件放到自己的 `router-view` 中展示
+2. **其他组件**：它们内部的 `router-view` 展示的都是各自路由配置中的子组件
+
+app.vue中的router-view由谁来出发呢？显示的又是哪个组件的内容呢？
+
+App.vue的router-view触发机制：
+
+关键点：App.vue 是 Vue Router 的**入口点**
+
+当你在项目中配置 Vue Router 时：
+
+```js
+// main.js
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import App from './App.vue'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/admin',
+      component: Layout,
+      children: [...]
+    }
+  ]
+})
+
+const app = createApp(App)
+app.use(router)  // ← 这里很关键！
+app.mount('#app')
+```
+
+**`app.use(router)` 这一行代码做了什么？**
+
+它告诉 Vue：
+
+1. app.vue是默认渲染组件，是应用的跟组件，监听浏览器的 URL 变化
+2. 当 URL 变化时，从根组件开始扫描，找到**第一层**匹配的组件，
+3. 将这个组件渲染到**第一个遇到的** `router-view` 中
+
+
+
+具体的触发流程：
+
+第1步：URL 变化
+
+```
+浏览器地址栏：http://localhost:3000/admin/users/list
+```
+
+第2步：Vue Router 解析路由
+
+```js
+// Vue Router 内部逻辑（简化版）
+function parseRoute(url) {
+  // 解析 /admin/users/list
+  const matched = [
+    { path: '/admin', component: Layout },           // 层级 0
+    { path: '/admin/users', component: UserManagement }, // 层级 1
+    { path: '/admin/users/list', component: UserList }   // 层级 2
+  ]
+  return matched
+}
+```
+
+第3步：Vue Router 开始渲染
+
+将/admin对应的组件渲染到app的router-view中。
+
+
+
+==实例如下==
+
+路由配置：
+
+```js
+const routes = [
+  {
+    path: '/admin',          // ← 第一级路由
+    component: Layout,       // ← 会渲染到 App.vue 的 router-view
+    children: [
+      {
+        path: 'users',       // ← Layout 的子路由
+        component: UserManagement,  // ← 会渲染到 Layout 的 router-view
+        children: [
+          {
+            path: 'list',    // ← UserManagement 的子路由
+            component: UserList  // ← 会渲染到 UserManagement 的 router-view
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+渲染对应关系：
+
+当访问 `/admin/users/list` 时：
+
+```vue
+<!-- App.vue - 根组件 -->
+<template>
+  <div id="app">
+    <!-- 展示第一级路由组件：Layout -->
+    <router-view />  
+  </div>
+</template>
+
+<!-- Layout.vue - 第一级路由组件 -->
+<template>
+  <div class="layout">
+    <header>导航</header>
+    <!-- 展示自己的子路由组件：UserManagement -->
+    <router-view />  
+  </div>
+</template>
+
+<!-- UserManagement.vue - Layout的子组件 -->
+<template>
+  <div>
+    <h2>用户管理</h2>
+    <!-- 展示自己的子路由组件：UserList -->
+    <router-view />  
+  </div>
+</template>
+
+<!-- UserList.vue - UserManagement的子组件 -->
+<template>
+  <div>
+    <h3>用户列表</h3>
+    <!-- 最终显示的内容，没有子路由了 -->
+  </div>
+</template>
+```
+
+| 组件               | router-view 的作用              | 展示什么                                |
+| ------------------ | ------------------------------- | --------------------------------------- |
+| App.vue            | 根级别的 router-view            | 第一级路由组件（Layout）                |
+| Layout.vue         | Layout 内的 router-view         | Layout 的子路由组件（UserManagement）   |
+| UserManagement.vue | UserManagement 内的 router-view | UserManagement 的子路由组件（UserList） |
+

@@ -2,7 +2,7 @@
 title:JavaScript
 ---
 
-
+[TOC]
 
 
 
@@ -3444,15 +3444,59 @@ console.log("同步代码 2");
 
 
 
-### -promise
+### promise
 
-#### **1.如何返回一个promise**
+> 什么是promise
+
+Promise 是一个代表异步操作最终结果的对象。你可以把它理解为一个"承诺"——现在可能还没有结果，但承诺将来会给你一个结果（成功或失败）。
+
+Promise有三种状态
+
+- **pending（等待中）**：初始状态，既没有成功也没有失败
+- **fulfilled（已完成）**：操作成功完成
+- **rejected（已拒绝）**：操作失败
+
+状态只能从 pending 变为 fulfilled 或 rejected，且状态一旦改变就不能再变。
 
 在 JavaScript 中返回一个 Promise 对象需要遵循其基本语法规则。以下是不同场景下的实现方式：
 
----
+**resolve 和 reject**：这是 Promise 构造函数提供的两个函数参数。当异步操作成功时调用 resolve，失败时调用 reject。
 
-关于，执行顺序可以暂时先简单的这样来理解：在promise中有一个状态变量，初始为pending，`resolve`函数的作用是，将`Promise`对象的状态从“未完成”变为“成功”（即从 pending 变为 resolved），在异步操作成功时调用，并将异步操作的结果，作为参数传递出去；`reject`函数的作用是，将`Promise`对象的状态从“未完成”变为“失败”（即从 pending 变为 rejected），在异步操作失败时调用，并将异步操作报出的错误，作为参数传递出去。
+**then、catch、finally**：
+
+- `then()`：处理成功的结果
+- `catch()`：处理失败的情况
+- `finally()`：无论成功失败都会执行
+
+关于，执行顺序可以暂时先简单的这样来理解：在promise中有一个状态变量，初始为pending，`resolve`函数的作用是，将`Promise`对象的状态从“未完成”变为“成功”（即从 pending 变为 resolved），在异步操作成
+
+功时调用，并将异步操作的结果，作为参数传递出去；`reject`函数的作用是，将`Promise`对象的状态从“未完成”变为“失败”（即从 pending 变为 rejected），在异步操作失败时调用，并将异步操作报出的错误，作
+
+为参数传递出去。
+
+Promise 状态变化：
+pending → resolve(data) → .then(成功回调) 
+       → reject(error) → .then(失败回调) 或 .catch(错误回调)
+
+以下两种写法是等价的：
+
+```
+// 写法1：
+promise.then(成功处理, 失败处理);
+
+// 写法2（更常用）：
+promise
+  .then(成功处理)
+  .catch(失败处理);
+```
+
+
+
+`resolve`和`reject`调用执行：
+
+**resolve() 被调用** → 执行 `.then()` 中的**第一个函数**（成功回调）
+
+**reject() 被调用** → 执行 `.then()` 中的**第二个函数**（失败回调）或 `.catch()` 中的函数
 
 ```
 promise.then(function(value) {
@@ -3461,170 +3505,360 @@ promise.then(function(value) {
   // failure
 });
 
-then方法可以接受两个回调函数作为参数。第一个回调函数是Promise对象的状态变为`fulfilled`时调用，第二个回调函数是Promise对象的状态变为rejected时调用。这两个函数都是可选的，不一定要提供。它们都接受Promise对象传出的值作为参数。
+then方法可以接受两个回调函数作为参数。第一个回调函数是Promise对象的状态变为`fulfilled`时调用，第二个回调函数是Promise对象的状态变为rejected时调用。这两个函数都是可选的，不一定要提供。它们都接受
+Promise对象传出的值作为参数。当执行resolve的时候，状态pending→fuilfilled，执行	then里的第一个函数；当执行reject的时候，状态pending→rejected，执行then里的第二个函数，或者是紧跟着的.catch()。关于执行时机，我觉得可以理解为，首先执行外部方法，返回一个promise对象实例，然后执行实例对象内部的逻辑，如果执行到了resolve，就进行状态转换，并执行对应的函数部分。reject同理。
 ```
 
 
 
-一、基础返回 Promise
+#### 1.promise实例展示
 
-**场景**：手动创建一个新的 Promise 对象
+【实例1 文件读取】
 
-```javascript
-function createPromise() {
-    //resolve，和reject都是promise是回调函数参数，两个回调函数的形式取决于then和catch传入的函数值
-    //，我们只需要在特定的时机调用两个回调即可
+```js
+// 原始的回调函数版本
+function readFile(filename, callback) {
+  setTimeout(() => {
+    if (filename.endsWith('.txt')) {
+      callback(null, `这是 ${filename} 的内容`);
+    } else {
+      callback(new Error('只支持 .txt 文件'));
+    }
+  }, 1000);
+}
+
+// 使用回调函数（旧方式）
+readFile('document.txt', (error, data) => {
+  if (error) {
+    console.log('错误：', error.message);
+  } else {
+    console.log('文件内容：', data);
+  }
+});
+```
+
+```js
+// 改造为 Promise 版本
+function readFilePromise(filename) {
   return new Promise((resolve, reject) => {
-    // 异步操作（例如 API 请求、定时器等）
     setTimeout(() => {
-      const success = true; // 假设操作成功
-      if (success) {
-        resolve("Operation succeeded!"); // 返回成功结果
+      if (filename.endsWith('.txt')) {
+        resolve(`这是 ${filename} 的内容`);
       } else {
-        reject(new Error("Operation failed!")); // 返回错误对象
+        reject(new Error('只支持 .txt 文件'));
       }
     }, 1000);
   });
 }
 
-// 使用
-createPromise()
-  .then(result => console.log(result)) // "Operation succeeded!"
-  .catch(error => console.error(error));
+// 使用 Promise（新方式）
+readFilePromise('document.txt')
+  .then(data => {
+    console.log('文件内容：', data);
+  })
+  .catch(error => {
+    console.log('错误：', error.message);
+  });
 
-/*
-function resolve(result){
-	console.log(result)
-}
-
-function reject(error){
-	console.error(error)
-}
-
-
-*/
 ```
 
----
+【实例2 用户登录验证】
 
-二、包装回调函数为 Promise
+```js
+// 原始版本
+function loginUser(username, password, callback) {
+  setTimeout(() => {
+    if (username === 'admin' && password === '123456') {
+      callback(null, {
+        id: 1,
+        name: 'admin',
+        token: 'abc123'
+      });
+    } else {
+      callback(new Error('用户名或密码错误'));
+    }
+  }, 800);
+}
 
-**场景**：将传统回调函数封装成 Promise
+// 使用回调函数
+loginUser('admin', '123456', (error, user) => {
+  if (error) {
+    console.log('登录失败：', error.message);
+  } else {
+    console.log('登录成功：', user);
+  }
+});
 
-```javascript
-function readFilePromise(filename) {
+```
+
+```js
+// Promise 版本
+function loginUserPromise(username, password) {
   return new Promise((resolve, reject) => {
-    // 假设是 Node.js 的 fs.readFile
-    fs.readFile(filename, 'utf8', (err, data) => {
-      if (err) {
-        reject(err); // 错误时 reject
+    setTimeout(() => {
+      if (username === 'admin' && password === '123456') {
+        resolve({
+          id: 1,
+          name: 'admin',
+          token: 'abc123'
+        });
       } else {
-        resolve(data); // 成功时 resolve
+        reject(new Error('用户名或密码错误'));
       }
-    });
+    }, 800);
   });
 }
 
-// 使用
-readFilePromise('example.txt')
-  .then(content => console.log(content))
-  .catch(err => console.error("读取失败:", err));
-```
-
-再封装
-
-```
-const fs = require('fs')
-const path = require('path')
-const textPath = path.join(__dirname, '/test.md')
-
-// 读取示例文件
-fs.readFile(textPath, 'utf8', (err, data) => {
-  // 通过promisefy转化为链式调用
-  const readFileSync = promisefy(fs.readFile)
-  console.log(readFileSync)
-
-  readFileSync(textPath, 'utf8')
-    .then((res) => {
-      console.log(res === data) // 此处结果预期：true，即promise返回内容与前面读取内容一致
-    })
-    .catch((err) => {})
-})
-
-const promisefy = (fn) => {
-
-  return (textPath,type) => 
-    new Promise((resolve, reject) => {
-      fn(textPath,type,(err, data) => {
-        if(err) reject(err)
-        else resolve(contrast)
-      })
+// 使用 Promise
+loginUserPromise('admin', '123456')
+  .then(user => {
+    console.log('登录成功：', user);
   })
+  .catch(error => {
+    console.log('登录失败：', error.message);
+  });
+
+
+```
+
+【实例4 多异步操作】
+
+```js
+// 场景：获取用户信息 -> 获取用户权限 -> 获取用户订单
+
+// 回调函数版本（回调地狱）
+function getUserInfo(userId, callback) {
+  setTimeout(() => callback(null, { id: userId, name: '用户' + userId }), 300);
 }
 
+function getUserPermissions(user, callback) {
+  setTimeout(() => callback(null, ['read', 'write']), 300);
+}
+
+function getUserOrders(user, callback) {
+  setTimeout(() => callback(null, [{ orderId: 1, amount: 100 }]), 300);
+}
+
+// 回调地狱
+getUserInfo(123, (err, user) => {
+  if (err) return console.log('错误1：', err);
+  
+  getUserPermissions(user, (err, permissions) => {
+    if (err) return console.log('错误2：', err);
+    
+    getUserOrders(user, (err, orders) => {
+      if (err) return console.log('错误3：', err);
+      
+      console.log('最终结果：', { user, permissions, orders });
+    });
+  });
+});
 
 ```
 
+```js
+// Promise 版本
+function getUserInfoPromise(userId) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve({ id: userId, name: '用户' + userId }), 300);
+  });
+}
 
+function getUserPermissionsPromise(user) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(['read', 'write']), 300);
+  });
+}
 
+function getUserOrdersPromise(user) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve([{ orderId: 1, amount: 100 }]), 300);
+  });
+}
 
+// Promise 链式调用（清晰多了）
+getUserInfoPromise(123)
+  .then(user => {
+    console.log('获取用户信息：', user);
+    return getUserPermissionsPromise(user);
+  }) //这里返回一个promise，继续使用链式调用
+  .then(permissions => {
+    console.log('获取用户权限：', permissions);
+    return getUserOrdersPromise({ id: 123 });
+  })
+  .then(orders => {
+    console.log('获取用户订单：', orders);
+    console.log('所有数据获取完成！');
+  })
+  .catch(error => {
+    console.log('出现错误：', error);
+  });
+```
 
+【实例4 async/await使用】
 
-
----
-
-
-
-
-
-三、在 async 函数中返回 Promise
-
-**场景**：使用 `async/await` 语法糖
-
-```javascript
-async function fetchData() {
+```js
+// 使用 async/await 让代码更像同步代码，使用async/await来代替then链式调用，代码看起来会更加简单。
+async function getAllUserData() {
   try {
-    const response = await fetch('https://api.example.com/data');
-    const data = await response.json();
-    return data; // 自动包装成 resolved Promise
+    const user = await getUserInfoPromise(123);
+    console.log('用户信息：', user);
+    
+    const permissions = await getUserPermissionsPromise(user);
+    console.log('用户权限：', permissions);
+    
+    const orders = await getUserOrdersPromise(user);
+    console.log('用户订单：', orders);
+    
+    return { user, permissions, orders };
   } catch (error) {
-    throw new Error("请求失败: " + error.message); // 自动包装成 rejected Promise
+    console.log('获取数据失败：', error);
   }
 }
 
-// 使用
-fetchData()
-  .then(data => console.log(data))
-  .catch(error => console.error(error));
+getAllUserData();
+
 ```
 
----
+【实例5 网络请求模拟】
 
-四、链式操作中返回新的 Promise
-
-**场景**：在 `.then()` 中返回新 Promise 以维持链式调用
-
-```javascript
-function step1() {
-  return new Promise((resolve,reject) =>{
-       setTimeout(() => resolve(10), 1000)
+```js
+// 传统 XMLHttpRequest 改造为 Promise
+function httpRequest(url) {
+  return new Promise((resolve, reject) => {
+    // 模拟网络延迟
+    setTimeout(() => {
+      if (url.includes('success')) {
+        resolve({
+          status: 200,
+          data: { message: '请求成功', timestamp: Date.now() }
+        });
+      } else if (url.includes('notfound')) {
+        reject({
+          status: 404,
+          message: '页面未找到'
+        });
+      } else {
+        reject({
+          status: 500,
+          message: '服务器错误'
+        });
+      }
+    }, Math.random() * 1000 + 500); // 500-1500ms 随机延迟
   });
 }
 
-function step2(value) {
-  return new Promise(resolve => setTimeout(() => resolve(value * 2), 1000));
+// 使用示例
+async function fetchData() {
+  try {
+    console.log('开始请求数据...');
+    const response = await httpRequest('https://api.example.com/success');
+    console.log('请求成功：', response);
+  } catch (error) {
+    console.log('请求失败：', error);
+  }
 }
 
-// 链式调用
-step1()
-  .then(result => step2(result)) // 必须返回新的 Promise
-  .then(finalResult => console.log(finalResult)) // 20
-  .catch(error => console.error(error));
+fetchData();
 ```
 
----
+#### 2.promise的一些其他方法
 
-五、常见错误及修复
+【promise静态方法】
+
+1. **Promise.resolve() - 创建一个已完成的 Promise**
+
+```js
+const resolvedPromise = Promise.resolve("立即成功");
+resolvedPromise.then(result => console.log(result));
+```
+
+2.  Promise.reject() - 创建一个已拒绝的 Promise  
+
+```js
+const rejectedPromise = Promise.reject("立即失败");
+rejectedPromise.catch(error => console.log(error));
+```
+
+
+
+3.  Promise.all() - 等待所有 Promise 完成
+
+```js
+const promise1 = Promise.resolve(1);
+const promise2 = Promise.resolve(2);
+const promise3 = Promise.resolve(3);
+
+Promise.all([promise1, promise2, promise3])
+  .then(results => {
+    console.log("所有结果：", results); // [1, 2, 3]
+  });
+```
+
+
+
+4. Promise.race() - 返回最先完成的 Promise
+
+```js
+const fastPromise = new Promise(resolve => setTimeout(() => resolve("快"), 100));
+const slowPromise = new Promise(resolve => setTimeout(() => resolve("慢"), 500));
+
+Promise.race([fastPromise, slowPromise])
+  .then(result => {
+    console.log("最快的结果：", result); // "快"
+  });
+```
+
+5. async/await - 更简洁的语法
+
+```js
+async function getUserInfo() {
+  try {
+    const user = await fetchUserData(123);
+    console.log("用户信息：", user);
+    
+    const posts = await fetchUserPosts(user);
+    console.log("用户文章：", posts);
+    
+    return { user, posts };
+  } catch (error) {
+    console.log("错误：", error);
+  }
+```
+
+
+
+**链式调用**：Promise 的 then 方法会返回一个新的 Promise，所以可以连续调用，避免了"回调地狱"的问题。
+
+#### 3.Promise 的优势
+
+传统的回调函数容易造成"回调地狱"：
+
+```javascript
+getData(function(a) {
+  getMoreData(a, function(b) {
+    getEvenMoreData(b, function(c) {
+      // 嵌套太深，难以维护
+    });
+  });
+});
+```
+
+而 Promise 让代码更清晰：
+
+```javascript
+getData()
+  .then(a => getMoreData(a))
+  .then(b => getEvenMoreData(b))
+  .then(c => {
+    // 代码更清晰易读
+  })
+  .catch(error => {
+    // 统一错误处理
+  });
+```
+
+#### 4.常见错误及修复
 
 错误 1：未返回 Promise
 
@@ -3653,129 +3887,96 @@ function riskyOperation() {
 riskyOperation().catch(err => console.error(err));
 ```
 
----
+> [!important]
+>
+> 误区：
+>
+> - 错误：认为 `resolve()` 后 `.then()` 回调会立即执行。
+> - 正确：`resolve()` 只是同步改变状态并保存值，回调必须等待同步代码执行完毕后才会异步触发。
+> - 补充：状态变为fulfilled后，.then会直接将回调加入到微任务队列。
+>
+> 以下是各种任务的执行顺序：
+>
+> - 执行所有同步代码，输出 `同步代码 1` 和 `同步代码 2`。
+> - 检查微任务队列，发现 Promise 的回调，执行并输出 `微任务（Promise）`。
+> - 最后执行宏任务队列中的 `setTimeout`，输出 `宏任务（setTimeout）`。
 
-#### 2.使用promise重构普通函数
+`resolve（）`在同步代码之后执行，
+
+```javascript
+console.log("Start");
+
+new Promise((resolve) => {
+  console.log("执行器中"); // 同步执行
+  resolve("结果");        // 同步改变状态为 fulfilled
+  console.log("resolve之后"); // 继续同步执行
+}).then((value) => {
+  console.log("then回调:", value); // 异步执行（微任务）
+});
+
+console.log("End");
+
+// 输出顺序：
+// Start → 执行器中 → resolve之后 → End → then回调: 结果
 
 ```
-// 模拟网络请求
-function fetchData(url, successCallback, errorCallback) {
-  setTimeout(() => {
-    const data = { id: 1, name: "Alice" };
-    const error = Math.random() > 0.5 ? null : "请求失败";
-    error ? errorCallback(error) : successCallback(data);
-  }, 1000);
+
+#### 5.链式调用传递的条件
+
+链式调用能够继续传递下去，也就是说能够执行`.then()`,可以调用`.then()`的对象包括：
+
+**1.标准 Promise 对象**
+
+- `new Promise()`
+- `Promise.resolve()`
+- `Promise.reject()`
+
+**2.自定义的 thenable 对象**
+
+- 只要有 `then` 方法就行
+
+**3.其他 Promise 库的对象**
+
+- jQuery 的 Deferred
+- Bluebird Promise
+- 等等
+
+```js
+
+// ===== 标准的 Promise 对象 =====
+console.log('=== 1. 标准 Promise ===');
+
+// 这些都可以调用 .then()
+const promise1 = new Promise(resolve => resolve('Promise对象'));
+const promise2 = Promise.resolve('Promise.resolve()');
+const promise3 = Promise.reject('Promise.reject()');
+
+promise1.then(result => console.log('✅', result));
+promise2.then(result => console.log('✅', result));
+promise3.catch(error => console.log('❌', error));
+
+```
+
+```js
+function goodExample() {
+  return new Promise(resolve => resolve(42));
 }
-
-fetchData(
-  "https://api.example.com",
-  (data) => console.log("成功:", data),
-  (err) => console.error("失败:", err)
-);
+goodExample().then((e)=>{
+    console.log(e)
+    //返回resolve，可以继续使用链式调用
+    return resolve(84)
+}).then((e)=>{
+    console.log(e*10)
+})
 ```
 
-使用promise重构
 
-```
-function fetchData(url) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const data = { id: 1, name: "Alice" };
-      const error = Math.random() > 0.5 ? null : "请求失败";
-      error ? reject(error) : resolve(data);
-    }, 1000);
-  });
-}
 
-// 使用方式
-fetchData("https://api.example.com")
-  .then(data => console.log("成功:", data))
-  .catch(err => console.error("失败:", err));
-```
-
-#### 3.promise执行流程
+------
 
 
 
-1. **同步执行执行器函数（Executor）**：
-   - 当你创建 Promise 时，传入的 `(resolve, reject) => { ... }` 函数会**立即同步执行**。
-   - 此时 Promise 的状态为 `pending`。
-
-2. **调用 `resolve()` 或 `reject()`**：
-   - **`resolve(value)`**：同步调用，将 Promise 状态从 `pending` 变为 `fulfilled`，并保存 `value`。
-   - **`reject(reason)`**：同步调用，将 Promise 状态从 `pending` 变为 `rejected`，并保存 `reason`。
-   - 一旦状态改变（`fulfilled` 或 `rejected`），**不可逆转**。
-
-3. **注册回调（`.then()` / `.catch()`）**：
-   - 通过 `.then(onFulfilled, onRejected)` 或 `.catch(onRejected)` 注册回调函数。
-   - 这些回调**不会立即执行**！它们会被放入**微任务队列**（Microtask Queue），等待当前同步代码执行完毕后才会触发。
-
-4. **异步执行回调**：
-   - 当所有同步代码执行完毕，事件循环会检查**微任务队列**，依次执行其中的回调。
-   - 例如：如果 Promise 被 `resolve('结果')`，则 `.then((value) => { ... })` 中的 `onFulfilled` 回调会异步执行，并收到 `value`。
-
----
-
-**流程修正与关键细节**：
-
-- **`resolve`/`reject` 是同步的，但回调是异步的**：
-
-  ```javascript
-  console.log("Start");
-  
-  new Promise((resolve) => {
-    console.log("执行器中"); // 同步执行
-    resolve("结果");        // 同步改变状态为 fulfilled
-    console.log("resolve之后"); // 继续同步执行
-  }).then((value) => {
-    console.log("then回调:", value); // 异步执行（微任务）
-  });
-  
-  console.log("End");
-  
-  // 输出顺序：
-  // Start → 执行器中 → resolve之后 → End → then回调: 结果
-  ```
-
-- **回调的执行依赖 Promise 的最终状态**：
-
-  - 如果 Promise 已经是 `fulfilled`，`.then()` 会直接将回调加入微任务队列。
-  - 如果 Promise 还是 `pending`，回调会**暂存**，直到状态改变后再加入队列。
-
-- **链式调用与错误传递**：
-
-  - `.then()` 返回一个新的 Promise，可以继续链式调用。
-  - 如果回调中抛出错误或返回一个拒绝的 Promise，错误会传递到后续的 `.catch()` 或 `.then` 的第二个参数。
-
-  ```javascript
-  Promise.resolve()
-    .then(() => {
-      throw new Error("Oops!"); // 抛出错误 → 触发后续 catch
-    })
-    .catch((err) => {
-      console.log("捕获错误:", err); // 异步执行
-    });
-  ```
-
----
-
-**总结你的描述**：
-
-- **正确**：调用 `resolve()` 或 `reject()` 会同步改变 Promise 的状态，并保存值。
-- **需要补充**：通过 `.then()` 注册的回调是**异步执行**的（属于微任务），且执行顺序严格遵循事件循环规则。
-
-**常见误区**：
-
-- **错误认知**：认为 `resolve()` 后 `.then()` 回调会立即执行。
-- **正确理解**：`resolve()` 只是同步改变状态并保存值，回调必须等待同步代码执行完毕后才会异步触发。
-
----
-
-通过这样的流程梳理，可以避免因同步/异步混淆导致的 Bug，例如在 `resolve()` 后立即操作依赖回调结果的代码时出错。希望这个解释能帮你彻底掌握 Promise 的执行机制！ 😊
-
-
-
-### -instance of 和typeof
+### instance of 和typeof
 
 你观察到的现象并不冲突，而是由JavaScript类型判断机制的特性决定的。以下是详细解释：
 
