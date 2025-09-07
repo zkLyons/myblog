@@ -3453,7 +3453,7 @@ const updateMessage = async () => {
 
 ### ref在动态引入dom中的多种用法
 
-#### 动态用法
+##### 动态用法
 
 在 Vue 3 中，使用 `ref` 动态引用 DOM 元素是一种常见操作，尤其在需要直接操作 DOM 的场景（如焦点控制、动画触发、第三方库集成）中非常有用。以下是动态引用 DOM 元素的详细用法说明：
 
@@ -3656,7 +3656,7 @@ onMounted(() => {
 
 通过合理使用动态 `ref`，可以灵活操作 DOM 元素，实现复杂的交互需求。
 
-#### 静态用法
+##### 静态用法
 
 在 Vue 3 中，静态 `ref` 之所以能获取到 DOM 或组件实例，是因为 `<script setup>` 语法提供了一种隐式的自动绑定机制，而 `:ref`（动态绑定）需要开发者手动处理绑定逻辑。以下是详细解释：
 
@@ -3766,7 +3766,7 @@ Vue 的响应式更新是**批量处理**且**异步执行**的。
 
 ------
 
-#### **静态ref还是动态ref？**
+**静态ref还是动态ref？**
 
  选择静态 `ref` 的场景：
 
@@ -4657,7 +4657,7 @@ this.$refs.childRef.someMethod(); // 可以直接调用子组件的方法
 
 `defineExpose` 接受一个**对象**作为参数，这个对象的键就是你想暴露给父组件的属性名，值就是对应的变量或函数。
 
-#### 示例
+==示例==
 
 假设你有一个子组件 `ChildComponent.vue`，它有一个内部变量 `count` 和一个方法 `increment`。
 
@@ -4801,7 +4801,7 @@ const count = ref(0);
 
 ### export | import
 
-#### export
+##### export
 
 1. 默认暴露 (`export default {}`)
 
@@ -4874,7 +4874,7 @@ import { Button, Link } from './components.js';
 - **`<script setup>`**：Vue 3 的**隐式**暴露，是现代项目的首选。
 - **`export const`**：用于**命名**暴露，通常用于导出组合式函数或辅助工具，不推荐直接用于组件。
 
-#### import
+##### import
 
 
 
@@ -4964,7 +4964,7 @@ import { Button, Link } from './components.js';
 
 计算属性会监视用到的每一个值：
 
-#### computed 的核心作用
+==computed 的核心作用==
 
 1. **响应式依赖追踪**
 
@@ -5327,6 +5327,10 @@ Vue 3 的 `computed` 具有**精确的依赖追踪能力**：
 
 这种机制让 Vue 3 的响应式系统既强大又高效！
 
+------
+
+
+
 ### 监视属性watch/watchEffect
 
 `computed` 确实和 `watch`/`watchEffect` 监视属性有相似之处，但它们有着本质的区别。让我来对比一下：
@@ -5659,11 +5663,15 @@ const isActive = element.dataset.isActive === 'true'
 const count = parseInt(element.dataset.count)
 ```
 
+------
+
+
+
 ### \<component>\</component>组件
 
 Vue中的`<component>`是一个内置的特殊元素，用于动态渲染不同的组件。它通过`is`属性来决定要渲染哪个组件。
 
-#### 基本用法 (setup语法糖)
+##### 基本用法 (setup语法糖)
 
 ```vue
 <template>
@@ -5682,7 +5690,7 @@ const currentComponent = ref(ComponentA)
 </script>
 ```
 
-#### 标签页切换示例
+##### 标签页切换示例
 
 ```vue
 <template>
@@ -5717,7 +5725,7 @@ const tabs = [
 </script>
 ```
 
-#### 使用computed进行条件渲染
+##### 使用computed进行条件渲染
 
 ```vue
 <template>
@@ -5748,7 +5756,7 @@ const handleUpdate = (data) => {
 </script>
 ```
 
-#### 配合KeepAlive使用
+##### 配合KeepAlive使用
 
 ```vue
 <template>
@@ -5781,9 +5789,13 @@ const toggleComponent = () => {
 </script>
 ```
 
+------
+
+
+
 ### \<router-view>\</router-view>
 
-#### 基本用法
+##### 基本用法
 
 `<router-view>` 是 Vue Router 的核心组件，用于显示与当前路由匹配的组件内容。
 
@@ -5892,7 +5904,7 @@ const routes = [
 </template>
 ```
 
-#### 插槽
+##### 插槽
 
 作用域插槽用法
 
@@ -5927,7 +5939,7 @@ const routes = [
 
 
 
-#### 配合 KeepAlive 使用
+##### 配合 KeepAlive 使用
 
 - 缓存所有路由组件
 
@@ -5975,7 +5987,7 @@ const routes = [
 
 
 
-#### 组件生效的几种方式
+##### 组件生效的几种方式
 
 只要路由发生切换，`<router-view>` 就会自动显示对应的新组件。
 
@@ -6056,7 +6068,7 @@ const goBack = () => {
 
 被缓存的组件在路由切换时不会被销毁，而是被保存在内存中。
 
-#### 路由生效顺序
+##### 路由生效顺序
 
 1. **App.vue**：作为根组件，默认将第一级路由组件放到自己的 `router-view` 中展示
 2. **其他组件**：它们内部的 `router-view` 展示的都是各自路由配置中的子组件
